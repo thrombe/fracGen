@@ -1,5 +1,6 @@
 package main
 import (
+	"math"
 )
 
 func polynomialDist() {
@@ -9,7 +10,7 @@ func polynomialDist() {
     
     xfrom, xto := 0.0, 4.0
     yfrom, yto := 2.0, -2.0
-	
+
     xmap := mapRange(0, float64(width), xfrom, xto)
     ymap := mapRange(0, float64(height), yfrom, yto)
 	board := make([]float64, width*height)
@@ -19,7 +20,7 @@ func polynomialDist() {
         for x := 0; x < width; x++ {
 			ex, wae := xmap(float64(x)), ymap(float64(y))
 			num := (ex-1)*(ex-2)*(ex-3) - wae
-			board[y*width + x] = num
+			board[y*width + x] =num
 			if num > max {max = num}
         }
     }
@@ -28,10 +29,18 @@ func polynomialDist() {
 	for y := 0; y < height; y++ {
         for x := 0; x < width; x++ {
             rad, grn, blu := 0.0, 0.0, 0.0
-            grn = colmap(-absVal(board[y*width + height]))
+			val := absVal(board[y*width + x])
+            grn = colmap(-log(val)) // glowing curve + thiccccc black border
+			// grn = -log(val/max)*256 // stripey
+			// grn = -math.Sqrt(val/max)*255 // bit dimmer glow
+			// grn = val*255 // 
             set(x, y, int(rad), int(grn), int(blu))
 		}
 	}
 
     dumpImg(img)
+}
+
+func log(x float64) float64 { // just to ignore the import screams
+	return math.Log(x)
 }

@@ -36,21 +36,21 @@ func buddhabrot() {
         }
     }
 
-    // var max int
-    // for _, col := range board { // finding the max brightness so as to map it in 0 to 256
-    //     if max < col {max = col}
-    // }
-    // colmap := mapRange(0, float64(max), 0, 256)
+    var max int
+    for _, col := range board { // finding the max brightness so as to map it in 0 to 256
+        if max < col {max = col}
+    }
+    colmap := mapRange(0, float64(max), 0, 256)
     
-    // img, set := newImg(width, height)
-    // for y := 0; y < height; y++ { // creating image from board
-    //     for x := 0; x < width; x++ {
-    //         rad, grn, blu := 0, 0, 0
-    //         grn = round(colmap(float64(board[y*width + x])))
-    //         set(x, y, rad, grn, blu)
-    //     }
-    // }
-    // dumpImg(img)
+    img, set := newImg(width, height)
+    for y := 0; y < height; y++ { // creating image from board
+        for x := 0; x < width; x++ {
+            rad, grn, blu := 0, 0, 0
+            grn = round(colmap(float64(board[y*width + x])))
+            set(x, y, rad, grn, blu)
+        }
+    }
+    dumpImg(img)
 
     // // images without colormap are usually very dark when thr pixel to trajectory ratio is low.
     // // for eg: 10^8 trajectories and 1000*1000 is the only one(that i found) that looks better this way
@@ -64,18 +64,18 @@ func buddhabrot() {
     // }
     // dumpImg(img2)
 
-    img3, set3 := newImg(width, height) // image without color mapping i.e. with %256
-    for y := 0; y < height; y++ { // creating image from board
-        for x := 0; x < width; x++ {
-            rad, grn, blu := 0, 0, 0
-            col := board[y*width + x]
-            // if col < 256 {grn = col} else if col < 512 {grn, blu = 255, col-255} else if col < 768 {grn, blu, rad = 255, 255, col-511} else {grn, blu, rad = 255, 255, 255}
-            // if col < 256 {grn = col} else if col < 512 {grn, rad = 255, col-255} else if col < 768 {grn, rad, blu = 255, 255, col-511} else {grn, rad, blu = 255, 255, 255}
-            if col < 256 {grn = col} else if col < 512 {grn, rad = 180, col-255} else if col < 768 {grn, rad, blu = 180, 140, col-511} else {grn, rad, blu = 255, 255, 255}
-            set3(x, y, rad, grn, blu)
-        }
-    }
-    dumpImg(img3)
+    // img3, set3 := newImg(width, height) // image without color mapping i.e. with %256
+    // for y := 0; y < height; y++ { // creating image from board
+    //     for x := 0; x < width; x++ {
+    //         rad, grn, blu := 0, 0, 0
+    //         col := board[y*width + x]
+    //         // if col < 256 {grn = col} else if col < 512 {grn, blu = 255, col-255} else if col < 768 {grn, blu, rad = 255, 255, col-511} else {grn, blu, rad = 255, 255, 255}
+    //         // if col < 256 {grn = col} else if col < 512 {grn, rad = 255, col-255} else if col < 768 {grn, rad, blu = 255, 255, col-511} else {grn, rad, blu = 255, 255, 255}
+    //         // if col < 256 {grn = col} else if col < 512 {grn, rad = 180, col-255} else if col < 768 {grn, rad, blu = 180, 140, col-511} else {grn, rad, blu = 255, 255, 255}
+    //         set3(x, y, rad, grn, blu)
+    //     }
+    // }
+    // dumpImg(img3)
 }
 
 // helper for buddhabrot
