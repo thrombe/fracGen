@@ -6,7 +6,6 @@ import (
 func polynomialDist() {
     width := 2000
     height := 2000
-    img, set := newImg(width, height)
     
     xfrom, xto := 0.0, 4.0
     yfrom, yto := 2.0, -2.0
@@ -25,12 +24,14 @@ func polynomialDist() {
         }
     }
 
+	img, set := newImg(width, height)
 	colmap := mapRange(-max, 0, 0, 255) // setting board accouding to the color map
 	for y := 0; y < height; y++ {
         for x := 0; x < width; x++ {
             rad, grn, blu := 0.0, 0.0, 0.0
 			val := absVal(board[y*width + x])
             grn = colmap(-log(val)) // glowing curve + thiccccc black border
+			if grn < 256 {grn = 0} else if grn > 511 {grn = 255} // eliminating the black sudden black to green change in last one
 			// grn = -log(val/max)*256 // stripey
 			// grn = -math.Sqrt(val/max)*255 // bit dimmer glow
 			// grn = val*255 // 
