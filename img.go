@@ -6,7 +6,7 @@ import (
     "os"
     "image"
     "fmt"
-    // "math"
+    "math"
 )
 
 // image output stuff
@@ -49,4 +49,10 @@ func chopRange(s, e float64) func(float64) float64 {
     return func(num float64) float64 {
         if num < s {return s} else if num > e {return e} else {return num}
     }
+}
+
+// returns a square range around x, y with zoom x and y ranges as powers of 2
+func xyrange(pow, x, y float64) (float64, float64, float64, float64) {
+    nudge := math.Exp2(pow-1)
+    return x-nudge, x+nudge, y+nudge, y-nudge // y+nudge first cuz the y is flipped in the computer things or something
 }
