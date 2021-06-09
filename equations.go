@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-func polynomialDist() {
+func plotEq() {
     width := 2000
     height := 2000
     

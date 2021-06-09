@@ -18,7 +18,7 @@ func main() {
     // mandlebrot()
     // chaosFrac(5, 0.5, 5000000, 10000, 1)
 	// genImg()
-	// polynomialDist()
+	// plotEq()
     // buddhabrot()
     fmt.Println(findsols(1.73205080757, -5, 5, 1000))
 }
