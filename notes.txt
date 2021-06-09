@@ -1,0 +1,18 @@
+plan:
+  . use xyrange()
+  . explain how generation works in comments
+  . test polunomialDist for more functions
+
+try:
+  . buddhabrot but include the points that dont cross 2. ie dont ignore points inside mandlebrot set
+  . superimpose mandlebrot on top of few already made buddhabrot images but in different color
+  . convolutions on fractals/random images
+  . smart long gaussian? blur like the computerphile video
+  . the logistic curve or something (veritassium video)
+  . lorenz attractor and ++ +3d?
+  . chaos equations from code parade
+  . the complex cellular automata from sabestian lague
+  . 
+
+mandlebrot:
+  . 1/(1+e^-(it - offset))
