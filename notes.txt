@@ -1,10 +1,14 @@
 plan:
-  . use xyrange()
   . explain how generation works in comments
-  . test polunomialDist for more functions
+  . implement anti-aliasingbin mandlebrot and plotEq
+    . try limiting it to selective area (like where there is more detail)
+    . is it possible for chaos equations or buddhabrot?
+      . no ig. cuz the points are already rounded to pixels
+  . 
 
 try:
   . buddhabrot but include the points that dont cross 2. ie dont ignore points inside mandlebrot set
+    . or only the points that dont cross 2
   . superimpose mandlebrot on top of few already made buddhabrot images but in different color
   . convolutions on fractals/random images
   . smart long gaussian? blur like the computerphile video
@@ -15,4 +19,48 @@ try:
   . 
 
 mandlebrot:
-  . 1/(1+e^-(it - offset))
+  .
+
+findsol:
+  . it seems like there is no easy solution to the two precision problems below.
+    . cuz it would need more digits in functions like sin, cos, log etc that are used in s()
+    . so first, more digits in sub functions are needed
+    . then more digits in calculations of s()
+    . and more digits in value of y
+  . precision
+    . seems like 10^-16 is the max precision (for value of s) :( 
+      (it dosent mean solution has this many digits of accuracy :( its a few digits less (10 ish decimal places))
+    . the problem happens cuz (i think) dy gets too small to chnage the y value. (too precise compared to y)
+    . the problem will get worse as the solution y coord gets higher (ie gain more digits to the left)
+    . this should be fixable by bringing the solution down to the x axis
+      so if we want more digits, maybe change equation in such a way that the current known sol lies on x axis
+    . tho this still wont fix the prob for too long. but maybe can gain a few digits of precision
+    . 
+  . precision 2.0
+    . misses solutions if value of 'accuracy' is less than 10^-14
+    . it might still miss some. idk what value of that to choose, so that 
+      it dosent miss any values
+    . 
+  . try to figure out how many digits are good. ie find the error in calculations
+  . get a function to calculate intersection of 2 curves
+    . can do this by f1(x, y)-f2(x, y) and then flip x and y
+    . subtracting values of functions brings down the solution to y == 0
+      and flipping x and y gets them on y axis instead.
+      so all that needs to be done after that is call findsol(0, ...)
+    . 
+  . 
+
+findsols explain:
+ycurr, dycurr -> both these are used to store y and dy resp.
+    so that we can change them and not worry about actual y and dy
+curr and prev -> stores current and previous guess
+sols -> stores found solutions in a list
+searchdepth -> how many times should i oscillate about the solution (max)
+accuracy -> how small should s() become for it to be considered a solution
+    (since s() = 0 would be a perfect solution)
+preprev -> stores the value of previous to prev (y-2*dy).
+    it is used to decide if the solution lies between curr and prev or prev and preprev.
+trigger -> this bool was added just to prevent the algo from checking till max search depth
+    every time the value of s() increases from one guess to next.
+    its set to true if the the guesses value of s() starts decreasing as we guess more values
+ys and ye -> y start and y end. ie the y bounds

@@ -5,27 +5,33 @@ import (
 	"math"
 )
 
+func equation() func(float64, float64) float64 {
+    return func(x, y float64) float64 {
+        // val := (x-1)*(x-2)*(x-3)-y
+  		// val := math.Tan(x*x+y*y) - 1
+		val := math.Cos(x*x+y*y)-0.5*x*y
+		// val := math.Sin(x*x+y*y)-math.Cos(x*y)
+		// val := math.Sin(math.Exp(-20*x)) - y
+        // val := x*x+y*y-5
+        return absVal(val)
+    }
+}
+
 func plotEq() {
     width := 2000
     height := 2000
-    
-    // xfrom, xto := 0.0, 4.0
-    // yfrom, yto := 2.0, -2.0
     xfrom, xto, yfrom, yto := xyrange(4, 0, 0)
 
     xmap := mapRange(0, float64(width), xfrom, xto)
     ymap := mapRange(0, float64(height), yfrom, yto)
 	board := make([]float64, width*height)
+	s := equation()
 
 	var max float64
     for y := 0; y < height; y++ { // calculating s for every pixel
         for x := 0; x < width; x++ {
 			ex, wae := xmap(float64(x)), ymap(float64(y))
-			// num := (ex-1)*(ex-2)*(ex-3) - wae
-			// num := math.Tan(ex*ex+wae*wae) - 1
-			num := math.Cos(ex*ex+wae*wae)-0.5*ex*wae
-			// num := math.Sin(ex*ex+wae*wae)-math.Cos(ex*wae)
-			// num := math.Sin(math.Exp(-20*ex)) - wae
+			num := s(ex, wae)
 			board[y*width + x] = absVal(num)
 			if num > max {max = num}
         }
@@ -37,7 +43,7 @@ func plotEq() {
         for x := 0; x < width; x++ {
             rad, grn, blu := 0.0, 0.0, 0.0
 			val := board[y*width + x]
-            grn = colmap(log(val)) // glowing curve + thiccccc black border
+            grn = colmap(math.Log(val)) // glowing curve + thiccccc black border
 			if grn < 256 {grn = 0} else if grn > 511 {grn = 255} // eliminating the black sudden black to green change in last one
 			// grn = -log(val/max)*256 // stripey
 			// grn = -math.Sqrt(val/max)*255 // bit dimmer glow
@@ -51,30 +57,37 @@ func plotEq() {
 
 func findsols(x, ys, ye float64, height int) []float64 {
     dy := (ye-ys)/float64(height)
-    s := equation()
+    accuracy := 0.00000000000001
+    searchdepth := 1000
     var sols []float64
-    prev := s(x, ys-dy)
-    var dec bool // true if trend is decreasing value of s(x, y)
+    var trigger bool // this bool is used as a one time trigger for each possible solution
+    
+    s := equation()
+    var prev, curr float64
+    prev = s(x, ys-dy)
     for y := ys; y <= ye; y += dy {
-        curr := s(x, y)
-        if curr < 0.00000000000001 {sols = append(sols, y)}
-        if !dec && curr < prev {dec = true} // else if dec && curr > prev {dec = false}
-        if dec && curr > prev { // once increasing, always triggers. fix plz
+        curr = s(x, y)
+        if curr < accuracy {sols = append(sols, y)} // check if guess is correct
+        if !trigger && curr < prev {trigger = true} // there is possibly a solution ahead cuz trend is decreasing s()
+        if trigger && curr > prev { // if the trend changed from decreasing s() to increasing, we passed a solution
             preprev := s(x, y-dy*2)
-            var ycurr float64
-            if preprev < curr {prev, curr, ycurr = preprev, prev, y-dy} else {ycurr = y}
-            dycurr := dy
-            for i := 0; i < 100; i++ {
+            var ycurr float64 // used to keep track of the jumping y value while searching for solution
+            dycurr := dy // same as ycurr
+            if preprev < curr {
+                prev, curr, ycurr = preprev, prev, y-dy
+            } else {
+                ycurr = y
+            }
+            for i := 0; i < searchdepth; i++ { // jumping around to find the solution
                 dycurr = dycurr/2
                 ycurr -= dycurr
                 mid := s(x, ycurr)
                 // fmt.Println(ycurr, dycurr, curr, mid, prev) //////////
-                if mid < 0.00000000000001 {
+                if mid < accuracy { // check if new guess is correct enough
                     sols = append(sols, ycurr)
-                    curr = s(x, y)
                     break
                 }
-                if prev < curr {
+                if prev < curr { // deciding if solution is above the guess or below
                     curr = mid
                     if dycurr < 0 {dycurr = -dycurr}
                 } else {
@@ -82,23 +95,11 @@ func findsols(x, ys, ye float64, height int) []float64 {
                     if dycurr > 0 {dycurr = -dycurr}
                 }
             }
-            curr = s(x, y)
-            // return sols // debug
-            dec = false
+            curr = s(x, y) // resetting curr for next loop
+            trigger = false
         }
         prev = curr
     }
+    fmt.Println(sols)
     return sols
-}
-
-func equation() func(float64, float64) float64 {
-    return func(x, y float64) float64 {
-        // return absVal((x-1)*(x-2)*(x-3)-y)
-        return absVal(x*x+y*y-5)
-    }
-}
-
-func log(x float64) float64 { // just to ignore the import screams
-    _ = fmt.Fprint
-	return math.Log(x)
 }

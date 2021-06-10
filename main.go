@@ -20,7 +20,7 @@ func main() {
 	// genImg()
 	// plotEq()
     // buddhabrot()
-    fmt.Println(findsols(1.73205080757, -5, 5, 1000))
+    findsols(0.25, -5, 5, 1000)
 }
 
 func genImg() {
