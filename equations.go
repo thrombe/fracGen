@@ -9,10 +9,14 @@ func equation() func(float64, float64) float64 {
     return func(x, y float64) float64 {
         // val := (x-1)*(x-2)*(x-3)-y
   		// val := math.Tan(x*x+y*y) - 1
-		val := math.Cos(x*x+y*y)-0.5*x*y
+		// val := math.Cos(x*x+y*y)-0.5*x*y
 		// val := math.Sin(x*x+y*y)-math.Cos(x*y)
 		// val := math.Sin(math.Exp(-20*x)) - y
         // val := x*x+y*y-5
+        // val := math.Cos(x*x+y*y)-x*y/4
+        // val := math.Cos(x*x+y*y)-x*y/2+x*x+y*y-16 // too dark
+        // val := math.Cos(x*x+y*y)-x*y/2-x*x-y*y+16 // too dark
+        val := min(absVal(math.Cos(x*x+y*y)-x*y/4), absVal(math.Cos(x*x+y*y)-x*y/2+x*x+y*y-16), absVal(math.Cos(x*x+y*y)-x*y/2-x*x-y*y+16))
         return absVal(val)
     }
 }
@@ -20,7 +24,7 @@ func equation() func(float64, float64) float64 {
 func plotEq() {
     width := 2000
     height := 2000
-    xfrom, xto, yfrom, yto := xyrange(4, 0, 0)
+    xfrom, xto, yfrom, yto := xyrange(3.5, 0, 0)
 
     xmap := mapRange(0, float64(width), xfrom, xto)
     ymap := mapRange(0, float64(height), yfrom, yto)
@@ -37,23 +41,31 @@ func plotEq() {
         }
     }
 
-	img, set := newImg(width, height)
-	colmap := mapRange(max, 0, 0, 255) // setting board accouding to the color map
+    // setting up color stuff
+	colmap := mapRange(max, 0, 0, 1) // setting board according to the color map
+    colfunc := func(x float64) float64 {
+        val := math.Log(x)*4 // glowing curve + thiccccc black border
+        val = colmap(val)
+        if val <= 1 {val = 0} else if val < 2 {val -= 1} else if val >= 2 {val = 1} // eliminating the black sudden black to green change in last one
+        return val // must return values 0 <= val <= 1 cuz lerp
+    }
+    plotcolor := vector(0, 255, 0)
+    bgcolor := vector(0, 0, 0)
+
+    img, set := newImg(width, height)
 	for y := 0; y < height; y++ {
         for x := 0; x < width; x++ {
-            rad, grn, blu := 0.0, 0.0, 0.0
-			val := board[y*width + x]
-            grn = colmap(math.Log(val)) // glowing curve + thiccccc black border
-			if grn < 256 {grn = 0} else if grn > 511 {grn = 255} // eliminating the black sudden black to green change in last one
-			// grn = -log(val/max)*256 // stripey
-			// grn = -math.Sqrt(val/max)*255 // bit dimmer glow
-			// grn = val*255 // 
-            set(x, y, int(rad), int(grn), int(blu))
+            val := colfunc(board[y*width + x])
+            color := vecLerp(plotcolor, bgcolor, val)
+            set(x, y, int(color[0][0]), int(color[1][0]), int(color[2][0]))
 		}
 	}
-
     dumpImg(img)
 }
+		// val = -log(val/max)*256 // stripey
+		// val = -math.Sqrt(val/max)*255 // bit dimmer glow
+		// val = val*255 // 
+
 
 func findsols(x, ys, ye float64, height int) []float64 {
     dy := (ye-ys)/float64(height)

@@ -56,3 +56,32 @@ func xyrange(pow, x, y float64) (float64, float64, float64, float64) {
     nudge := math.Exp2(pow-1)
     return x-nudge, x+nudge, y+nudge, y-nudge // y+nudge first cuz the y is flipped in the computer things or something
 }
+
+func min(vals ...float64) float64 {
+    minn := vals[0]
+    for _, val := range vals {
+        if minn > val {minn = val}
+    }
+    return minn
+}
+
+func max(vals ...float64) float64 {
+    maxx := vals[0]
+    for _, val := range vals {
+        if maxx < val {maxx = val}
+    }
+    return maxx
+}
+
+func vecApply(vec [][]float64, f func(float64) float64) [][]float64 {
+    length := len(vec)
+    vals := make([]float64, length)
+    for i := 0; i < length; i++ {
+        vals[i] = f(vec[i][0])
+    }
+    return vector(vals...)
+}
+
+func vecLerp(vec1, vec2 [][]float64, t float64) [][]float64 {
+    return matAdd(matScalar(vec1, t), matScalar(vec2, 1-t))
+}

@@ -18,9 +18,9 @@ func main() {
     // mandlebrot()
     // chaosFrac(5, 0.5, 5000000, 10000, 1)
 	// genImg()
-	// plotEq()
+	plotEq()
     // buddhabrot()
-    findsols(0.25, -5, 5, 1000)
+    // findsols(0.25, -5, 5, 1000)
 }
 
 func genImg() {
