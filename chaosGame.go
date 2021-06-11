@@ -16,8 +16,6 @@ func chaosFrac(sides int, jumpRatio float64, iterations int, imgSize int, rules 
     height := imgSize
     img, set := newImg(width, height)
     
-    cursor := createVec(float64(width)/2, float64(height)/2)
-
     for y := 0; y < height; y++ { // setting the background pixels
         for x := 0; x < width; x++ {
             rad, grn, blu := 0.0, 0.0, 0.0
@@ -25,15 +23,22 @@ func chaosFrac(sides int, jumpRatio float64, iterations int, imgSize int, rules 
         }
     }
     
-    var lastVer int
+    var lastVer int // keeping track of the previously chosen vertex
     
-    vertices := make([][][]float64, sides) // generating the polygon
-    center := createVec(float64(width)/2, float64(height)/2)
-    vertices[0] = createVec(float64(width)/2, 0)
+    vertices := make([]*vec4d, sides) // generating the polygon
+    center := vector2d(float64(width)/2, float64(height)/2)
+    vertices[0] = vector2d(float64(width)/2, 0)
     rot := rotMat(2*math.Pi/float64(sides))
     for i := 1; i < sides; i++ {
-        vertices[i] = matAdd(matMul(rot, matSub(vertices[i-1], center)), center)
+        vertices[i] = vecsub(vertices[i-1], center)
+        vertices[i].transform2d(rot)
+        vertices[i].add(center)
     }
+
+    cursor := vector2d(float64(width)/2, float64(height)/2)
+    t := 1-jumpRatio
+    // bgcolor := vector3d(0, 0, 0)
+    plotcolor := vector3d(0, 255, 0)
     for i := 0; i < iterations; i++ {
         ver := rand.Intn(sides)
         if rules[0] == 1 && lastVer == ver {
@@ -41,12 +46,12 @@ func chaosFrac(sides int, jumpRatio float64, iterations int, imgSize int, rules 
             continue
         }
         lastVer = ver
-        cursor = matAdd(matScalar(cursor, 1-jumpRatio), matScalar(vertices[ver], jumpRatio))
+        cursor.lerp(vertices[ver], t)
     
-        cholors := createVec(0, 0, 0)
+        // cholors := vector3d(0, 0, 0)
         // cholors[ver%3][0] = 255
-        cholors[1][0] = 255
-        set(int(cursor[0][0]), int(cursor[1][0]), int(cholors[0][0]), int(cholors[1][0]), int(cholors[2][0]))
+        // cholors.y = 255
+        set(int(cursor.x), int(cursor.y), int(plotcolor.x), int(plotcolor.y), int(plotcolor.z))
     }
     dumpImg(img)
 }

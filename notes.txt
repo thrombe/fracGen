@@ -4,7 +4,6 @@ plan:
     . try limiting it to selective area (like where there is more detail)
     . is it possible for chaos equations or buddhabrot?
       . no ig. cuz the points are already rounded to pixels
-  . use vec4d in chaosFrac
   . 
 
 try:
