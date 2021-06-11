@@ -66,6 +66,22 @@ func plotEq() {
     dumpImg(img)
 }
 
+/*
+findsols explain:
+    . ycurr, dycurr -> both these are used to store y and dy resp.
+          so that we can change them and not worry about actual y and dy
+    . curr and prev -> stores current and previous guess
+    . sols -> stores found solutions in a list
+    . searchdepth -> how many times should i oscillate about the solution (max)
+    . accuracy -> how small should s() become for it to be considered a solution
+          (since s() = 0 would be a perfect solution)
+    . preprev -> stores the value of previous to prev (y-2*dy).
+          it is used to decide if the solution lies between curr and prev or prev and preprev.
+    . trigger -> this bool was added just to prevent the algo from checking till max search depth
+          every time the value of s() increases from one guess to next.
+          its set to true if the the guesses value of s() starts decreasing as we guess more values
+    . ys and ye -> y start and y end. ie the y bounds
+*/
 func findsols(x, ys, ye float64, height int) []float64 {
     dy := (ye-ys)/float64(height)
     accuracy := 0.00000000000001
