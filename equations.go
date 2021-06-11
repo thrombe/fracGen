@@ -47,25 +47,24 @@ func plotEq() {
         val := math.Log(x)*4 // glowing curve + thiccccc black border
         val = colmap(val)
         if val <= 1 {val = 0} else if val < 2 {val -= 1} else if val >= 2 {val = 1} // eliminating the black sudden black to green change in last one
+        // val = -log(val/max)*256 // stripey
+		// val = -math.Sqrt(val/max)*255 // bit dimmer glow
+		// val = val*255 // 
         return val // must return values 0 <= val <= 1 cuz lerp
     }
-    plotcolor := vector(0, 255, 0)
-    bgcolor := vector(0, 0, 0)
+    plotcolor := vector3d(0, 255, 0)
+    bgcolor := vector3d(0, 0, 0)
 
     img, set := newImg(width, height)
 	for y := 0; y < height; y++ {
         for x := 0; x < width; x++ {
             val := colfunc(board[y*width + x])
-            color := vecLerp(plotcolor, bgcolor, val)
-            set(x, y, int(color[0][0]), int(color[1][0]), int(color[2][0]))
+            color := veclerp(plotcolor, bgcolor, val)
+            set(x, y, int(color.x), int(color.y), int(color.z))
 		}
 	}
     dumpImg(img)
 }
-		// val = -log(val/max)*256 // stripey
-		// val = -math.Sqrt(val/max)*255 // bit dimmer glow
-		// val = val*255 // 
-
 
 func findsols(x, ys, ye float64, height int) []float64 {
     dy := (ye-ys)/float64(height)

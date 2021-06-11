@@ -16,7 +16,7 @@ func chaosFrac(sides int, jumpRatio float64, iterations int, imgSize int, rules 
     height := imgSize
     img, set := newImg(width, height)
     
-    cursor := vector(float64(width)/2, float64(height)/2)
+    cursor := createVec(float64(width)/2, float64(height)/2)
 
     for y := 0; y < height; y++ { // setting the background pixels
         for x := 0; x < width; x++ {
@@ -28,8 +28,8 @@ func chaosFrac(sides int, jumpRatio float64, iterations int, imgSize int, rules 
     var lastVer int
     
     vertices := make([][][]float64, sides) // generating the polygon
-    center := vector(float64(width)/2, float64(height)/2)
-    vertices[0] = vector(float64(width)/2, 0)
+    center := createVec(float64(width)/2, float64(height)/2)
+    vertices[0] = createVec(float64(width)/2, 0)
     rot := rotMat(2*math.Pi/float64(sides))
     for i := 1; i < sides; i++ {
         vertices[i] = matAdd(matMul(rot, matSub(vertices[i-1], center)), center)
@@ -43,7 +43,7 @@ func chaosFrac(sides int, jumpRatio float64, iterations int, imgSize int, rules 
         lastVer = ver
         cursor = matAdd(matScalar(cursor, 1-jumpRatio), matScalar(vertices[ver], jumpRatio))
     
-        cholors := vector(0, 0, 0)
+        cholors := createVec(0, 0, 0)
         // cholors[ver%3][0] = 255
         cholors[1][0] = 255
         set(int(cursor[0][0]), int(cursor[1][0]), int(cholors[0][0]), int(cholors[1][0]), int(cholors[2][0]))

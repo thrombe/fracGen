@@ -15,11 +15,6 @@ func matrix(rows, cols int, vals ...float64) [][]float64 {
     return mat
 }
 
-//returns a len(values), 1 matrix
-func vector(vals ...float64) [][]float64 {
-    return matrix(len(vals), 1, vals...)
-}
-
 //multiply matrices of arbitary sizes(legal only ofc)
 func matMul(mat1, mat2 [][]float64) [][]float64 {
     m1rows, m1cols, m2rows, m2cols := len(mat1), len(mat1[0]), len(mat2), len(mat2[0])
@@ -154,6 +149,11 @@ func matTranspose(mat [][]float64) [][]float64 {
     return result
 }
 
+//returns a len(values), 1 matrix
+func createVec(vals ...float64) [][]float64 {
+    return matrix(len(vals), 1, vals...)
+}
+
 //returns the size of a n-dimentional vector
 func vecSize(vec [][]float64) float64 {
     if len(vec[0]) > 1 {panic("vecSize not a vector")}
@@ -189,16 +189,19 @@ func vecDot(vec1, vec2 [][]float64) float64 {
     return result
 }
 
-// returns modulus of the no. |n|
-func absVal(n float64) float64 {
-    if n >= 0 {return n} else {return -n}
+// apply a function to each element of a vector
+func vecApply(vec [][]float64, f func(float64) float64) [][]float64 {
+    length := len(vec)
+    vals := make([]float64, length)
+    for i := 0; i < length; i++ {
+        vals[i] = f(vec[i][0])
+    }
+    return createVec(vals...)
 }
 
-//rounds to nearest int and retrun int
-func round(i float64) int {
-    return int(math.Round(i))
-    //llim := int(i)
-    //if i-float64(llim) >= 0.5 {return llim+1} else {return llim}
+// linear interpolation between 2 vectors
+func vecLerp(vec1, vec2 [][]float64, t float64) [][]float64 {
+    return matAdd(matScalar(vec1, t), matScalar(vec2, 1-t))
 }
 
 // returns a 2 by 2 rotation matrix
@@ -208,19 +211,3 @@ func rotMat(theta float64) [][]float64 {
         math.Sin(theta), math.Cos(theta),
         )
 }
-
-/*
-//returns a func that returns if a point lies in a triangle (2d)
-func inTriangle(vertices [][][]float64) func([][]float64) bool {
-    v1v2 := matSub(vertices[1], vertices[0])
-    v1v3 := matSub(vertices[2], vertices[0])
-    v2v3 := matSub(vertices[2], vertices[1])
-    return func(point [][]float64) bool {
-        v1p := matSub(point, vertices[0])
-        v2p := matSub(point, vertices[1])
-        ori := (vecCross(v1v2, v1p)[2][0] > 0)
-        if (vecCross(v1v3, v1p)[2][0] < 0) != ori {return false}
-        if (vecCross(v2v3, v2p)[2][0] > 0) != ori {return false}
-        return true
-    }
-}*/
