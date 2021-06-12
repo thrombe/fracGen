@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"math/rand"
 )
 
 func equation() func(float64, float64) float64 {
@@ -30,6 +31,21 @@ func plotEq() {
     ymap := mapRange(0, float64(height), yfrom, yto)
 	board := make([]float64, width*height)
 	s := equation()
+	antialiasing := false
+
+    if antialiasing { // anti-aliasing (only useful if the coloring is such that the lines are thin (maybe))
+        se := equation()
+        pixwidth := (xto-xfrom)/float64(width)
+        pixwidthby2 := pixwidth/2
+        tries := 50
+        s = func(x, y float64) float64 {
+            var val float64
+            for i := 0; i < tries; i++ {
+                val += se(x+rand.Float64()*pixwidth-pixwidthby2, y+rand.Float64()*pixwidth-pixwidthby2)
+            }
+            return val/float64(tries)
+        }
+    }
 
 	var max float64
     for y := 0; y < height; y++ { // calculating s for every pixel
@@ -42,20 +58,18 @@ func plotEq() {
     }
 
     // setting up color stuff
-	colmap := mapRange(max, 0, 0, 1) // setting board according to the color map
+	colmap := mapRange(max, 0, 0, 1)
     colfunc := func(x float64) float64 {
-        val := math.Log(x)*4 // glowing curve + thiccccc black border
-        val = colmap(val)
+        val := colmap(math.Log(x)*4) // glowing curve + thiccccc black border
         if val <= 1 {val = 0} else if val < 2 {val -= 1} else if val >= 2 {val = 1} // eliminating the black sudden black to green change in last one
-        // val = -log(val/max)*256 // stripey
-		// val = -math.Sqrt(val/max)*255 // bit dimmer glow
-		// val = val*255 // 
+        // val := -log(val/max) // stripey
+		// val := -math.Sqrt(val/max) // bit dimmer glow
         return val // must return values 0 <= val <= 1 cuz lerp
     }
     plotcolor := vector3d(0, 255, 0)
     bgcolor := vector3d(0, 0, 0)
 
-    img, set := newImg(width, height)
+    img, set := newImg(width, height) // setting board according to the color map
 	for y := 0; y < height; y++ {
         for x := 0; x < width; x++ {
             val := colfunc(board[y*width + x])

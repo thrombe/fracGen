@@ -10,10 +10,6 @@ func mandlebrot() {
     img, set := newImg(width, height)
     
     iterations := 1000
-    // itmap := mapRange(0, float64(iterations), 0, 255)
-    // itboard := make([]int, width*height)
-    // xfrom, xto := -2.0, 1.0
-    // yfrom, yto := 1.5, -1.5
     xfrom, xto, yfrom, yto := xyrange(-6, -0.74571890570893210, -0.11624642707064532)
     xmap := mapRange(0, float64(width), xfrom, xto)
     ymap := mapRange(0, float64(height), yfrom, yto)
@@ -31,18 +27,14 @@ func mandlebrot() {
             for i := 0; i < iterations; i++ {
                 z = z*z + c*j + je*julia 
                 if real(z)*real(z) + imag(z)*imag(z) > 4 {
-                    // itboard[y*width + x] = i
-                    // grn = itmap(i)
-                    // grn = 256*math.Log(float64(i))/math.Log(float64(iterations-1))
-                    // grn = 256*math.Sqrt(float64(i)/float64(iterations))
-                    rad, grn, blu = colSch2(i, iterations)
+                    rad, grn, blu = colSch1(i, iterations)
                     break
                 }
             }
             set(x, y, round(rad), round(grn), round(blu))
         }
         if y % round(float64(height)/100) == 0 { // progress indicator
-            fmt.Printf("y %v done\n", float64(y)*100/float64(height))
+            fmt.Printf("%v done\n", float64(y)*100/float64(height))
         }
     }
     dumpImg(img)
@@ -64,6 +56,8 @@ func colSch1(i, iterations int) (float64, float64, float64) {
     if rad < 0 {rad = 0}
     if grn < 0 {grn = 0}
     if blu < 0 {blu = 0}
+    // grn = 256*math.Log(float64(i))/math.Log(float64(iterations-1))
+    // grn = 256*math.Sqrt(float64(i)/float64(iterations))
     shhh(dovmap)
     return rad, grn, blu
 }

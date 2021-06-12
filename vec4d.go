@@ -1,5 +1,8 @@
 package main
-import "math"
+import (
+	"math"
+	"math/rand"
+)
 
 type vec4d struct {
     x, y, z, w float64
@@ -86,6 +89,23 @@ func vector2d(x, y float64) *vec4d {
     v := vec4d{}
     v.x, v.y, v.z, v.w = x, y, 0, 0
     return &v
+}
+
+// returns random vector with each element between 0 to 1
+func vecRand3d() *vec4d {
+	v := vec4d{}
+	v.x = rand.Float64()
+	v.y = rand.Float64()
+	v.z = rand.Float64()
+	return &v
+}
+
+// returns random vector with each element between 0 to 1
+func vecRand2d() *vec4d {
+	v := vec4d{}
+	v.x = rand.Float64()
+	v.y = rand.Float64()
+	return &v
 }
 
 func veclerp(vec1, vec2 *vec4d, t float64) *vec4d {

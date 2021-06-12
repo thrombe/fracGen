@@ -1,16 +1,17 @@
 plan:
   . explain how generation works in comments
-  . implement anti-aliasingbin mandlebrot and plotEq
+  . implement anti-aliasingbin mandlebrot
     . try limiting it to selective area (like where there is more detail)
     . is it possible for chaos equations or buddhabrot?
       . no ig. cuz the points are already rounded to pixels
+  . buddhabrot but include the points that dont cross 2. ie dont ignore points inside mandlebrot set
+    . or only the points that dont cross 2
+  . convolutions on fractals/random images
+    . convolutions for anti-aliasing (bias)
   . 
 
 try:
-  . buddhabrot but include the points that dont cross 2. ie dont ignore points inside mandlebrot set
-    . or only the points that dont cross 2
   . superimpose mandlebrot on top of few already made buddhabrot images but in different color
-  . convolutions on fractals/random images
   . smart long gaussian? blur like the computerphile video
   . the logistic curve or something (veritassium video)
   . lorenz attractor and ++ +3d?
@@ -18,10 +19,15 @@ try:
   . the complex cellular automata from sabestian lague
   . 
 
-mandlebrot:
-  .
-
 findsol:
+  . try to figure out how many digits are good. ie find the error in calculations
+  . get a function to calculate intersection of 2 curves
+    . this works for only y = f(x) type functions
+      /. can do this by f1(x, y)-f2(x, y) and then flip x and y
+      /. subtracting values of functions brings down the solution to y == 0
+        and flipping x and y gets them on y axis instead.
+        so all that needs to be done after that is call findsol(0, ...)
+    . 
   . it seems like there is no easy solution to the two precision problems below.
     . cuz it would need more digits in functions like sin, cos, log etc that are used in s()
     . so first, more digits in sub functions are needed
@@ -40,13 +46,5 @@ findsol:
     . misses solutions if value of 'accuracy' is less than 10^-14
     . it might still miss some. idk what value of that to choose, so that 
       it dosent miss any values
-    . 
-  . try to figure out how many digits are good. ie find the error in calculations
-  . get a function to calculate intersection of 2 curves
-    . this works for only y = f(x) type functions
-      /. can do this by f1(x, y)-f2(x, y) and then flip x and y
-      /. subtracting values of functions brings down the solution to y == 0
-        and flipping x and y gets them on y axis instead.
-        so all that needs to be done after that is call findsol(0, ...)
     . 
   . 
