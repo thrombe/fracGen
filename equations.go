@@ -36,12 +36,11 @@ func plotEq() {
     if antialiasing { // anti-aliasing (only useful if the coloring is such that the lines are thin (maybe))
         se := equation()
         pixwidth := (xto-xfrom)/float64(width)
-        pixwidthby2 := pixwidth/2
         tries := 50
         s = func(x, y float64) float64 {
             var val float64
             for i := 0; i < tries; i++ {
-                val += se(x+rand.Float64()*pixwidth-pixwidthby2, y+rand.Float64()*pixwidth-pixwidthby2)
+                val += se(x+(rand.Float64()-0.5)*pixwidth, y+(rand.Float64()-0.5)*pixwidth)
             }
             return val/float64(tries)
         }

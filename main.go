@@ -15,10 +15,10 @@ func shhh(vals ...interface{}) {
 func main() {
     start := time.Now()
     defer func() {fmt.Println(time.Now().Sub(start))}()
-    // mandlebrot()
+    mandlebrot()
     // chaosFrac(5, 0.5, 5000000, 10000, 1)
 	// genImg()
-	plotEq()
+	// plotEq()
     // buddhabrot()
     // findsols(0.25, -5, 5, 1000)
 }
