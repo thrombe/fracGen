@@ -21,10 +21,6 @@ try:
   . the complex cellular automata from sabestian lague
   . 
 
-mandlebrot:
-  . try shifting the x loop inside goroutines and see if it speeds up
-  . figure out why singlesample in new version takes more time
-
 findsol:
   . try to figure out how many digits are good. ie find the error in calculations
   . get a function to calculate intersection of 2 curves
