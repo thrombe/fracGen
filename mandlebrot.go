@@ -9,50 +9,87 @@ func mandlebrot() {
     width := 2000
     height := 2000
     
-    iterations := 1000
+    samples := 4 // random samples per pixel
+    iterations := 1000 // max iterations per sample
     xfrom, xto, yfrom, yto := xyrange(-6, -0.74571890570893210, -0.11624642707064532)
-    julia := complex(0, 0) // 1, 0 is on
-    je := 0.25 + 0.0i
+    // j := 0.25 + 0.0i
+    eq := func(c, z complex128) complex128 {return z*z + c}
+    out := make(chan *pixel, 50) // store 50 calculated trajectories
+    workers := make(chan struct{}, 16) // no of goroutines calculating trajectories in parallel
     
-    var j complex128
-    if julia == complex(1, 0) {j = 0} else {j = 1}
     xmap := mapRange(0, float64(width), xfrom, xto)
     ymap := mapRange(0, float64(height), yfrom, yto)
     pixwidth := (xto-xfrom)/float64(width)
 
-    samples := 1
-    f := func(c complex128) (float64, float64, float64) {
-        var r, g, b float64
-        for s := 0; s < samples; s++ {
-            z := c
-            rc := complex((rand.Float64()-0.5)*pixwidth, (rand.Float64()-0.5)*pixwidth)
-            z += rc
-            for i := 0; i < iterations; i++ {
-                z = z*z + c*j + je*julia
-                if real(z)*real(z) + imag(z)*imag(z) > 4 {
-                    rad, grn, blu := colSch1(i, iterations)
-                    r += rad
-                    g += grn
-                    b += blu
-                    break
+    // there should be no need to change the two following functions
+    singlesample := func() {
+        img, set := newImg(width, height)
+        for y := 0; y < height; y++ {
+            for x := 0; x < width; x++ {
+                c := complex(xmap(float64(x)), ymap(float64(y)))
+                z := c
+                rad, grn, blu := 0.0, 0.0, 0.0
+                for i := 0; i < iterations; i++ {
+                    z = eq(c, z)
+                    if real(z)*real(z) + imag(z)*imag(z) > 4 {
+                            rad, grn, blu = colSch1(i, iterations)
+                        break
+                    }
                 }
+                set(x, y, round(rad), round(grn), round(blu))
+            }
+            if y % round(float64(height)/100) == 0 { // progress indicator
+                fmt.Printf("%v done\n", float64(y)*100/float64(height))
             }
         }
-        return r/float64(samples), g/float64(samples), b/float64(samples)
+        dumpImg(img)    
     }
-
-    img, set := newImg(width, height)
-    for y := 0; y < height; y++ {
-        for x := 0; x < width; x++ {
+    multisample := func() { // this is slow when doing just 1 sample per pixel
+        getpix := func(x, y int, out chan *pixel, workers chan struct{}) {
             c := complex(xmap(float64(x)), ymap(float64(y)))
-            rad, grn, blu := f(c)
-            set(x, y, round(rad), round(grn), round(blu))
+            p := pix(x, y, 0, 0, 0)
+            for s := 0; s < samples; s++ {
+                z := c
+                rc := complex((rand.Float64()-0.5)*pixwidth, (rand.Float64()-0.5)*pixwidth)
+                z += rc
+                for i := 0; i < iterations; i++ {
+                    z = eq(c, z)
+                    if real(z)*real(z) + imag(z)*imag(z) > 4 {
+                        rad, grn, blu := colSch1(i, iterations)
+                        p.r += rad
+                        p.g += grn
+                        p.b += blu
+                        break
+                    }
+                }
+            }
+            p.scalecolor(1/float64(samples))
+            out <- p
+            <- workers
         }
-        if y % round(float64(height)/100) == 0 { // progress indicator
-            fmt.Printf("%v percent done\n", float64(y)*100/float64(height))
+
+        go func(out chan *pixel, workers chan struct{}) { // creating more workers as needed
+            for y := 0; y < height; y++ {
+                for x := 0; x < width; x++ {
+                    workers <- struct{}{}
+                    go getpix(x, y, out, workers)
+                }
+            }
+        }(out, workers)
+
+        img, set := newImg(width, height)
+        lim := width*height
+        mod := round(float64(lim)/100)
+        for i := 0; i < lim; i++ { // filling image
+            p := <- out
+            set(p.x, p.y, round(p.r), round(p.g), round(p.b))
+            if i % mod == 0 { // progress indicator
+                fmt.Printf("%v percent done\n", float64(i)*100/float64(lim))
+            }
         }
+        dumpImg(img)
     }
-    dumpImg(img)
+    if samples == 1 {singlesample()} else {multisample()}
 }
 
 func colSch1(i, iterations int) (float64, float64, float64) {

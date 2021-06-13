@@ -4,6 +4,7 @@ import (
     "fmt"
     "time"
     // "math"
+    // "github.com/pkg/profile"
 )
 
 func shhh(vals ...interface{}) {
@@ -13,6 +14,9 @@ func shhh(vals ...interface{}) {
 }
 
 func main() {
+  	// defer profile.Start(profile.MemProfile).Stop()
+	// defer profile.Start().Stop()
+
     start := time.Now()
     defer func() {fmt.Println(time.Now().Sub(start))}()
     mandlebrot()

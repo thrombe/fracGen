@@ -2,12 +2,14 @@ plan:
   . explain how generation works in comments
   . implement anti-aliasingbin mandlebrot
     . try limiting it to selective area (like where there is more detail)
+      . how?
     . is it possible for chaos equations or buddhabrot?
       . no ig. cuz the points are already rounded to pixels
   . buddhabrot but include the points that dont cross 2. ie dont ignore points inside mandlebrot set
     . or only the points that dont cross 2
   . convolutions on fractals/random images
     . convolutions for anti-aliasing (bias)
+  . time estimators instead of percentage (wherever applicable)
   . 
 
 try:
@@ -18,6 +20,10 @@ try:
   . chaos equations from code parade
   . the complex cellular automata from sabestian lague
   . 
+
+mandlebrot:
+  . try shifting the x loop inside goroutines and see if it speeds up
+  . figure out why singlesample in new version takes more time
 
 findsol:
   . try to figure out how many digits are good. ie find the error in calculations

@@ -30,3 +30,23 @@ func fileName() string {
         if err != nil {return name}
     }
 }
+
+// pixel struct
+
+type pixel struct {
+    r, g, b float64
+    x, y int
+}
+
+func (p *pixel) scalecolor(t float64) {
+    p.r *= t
+    p.g *= t
+    p.b *= t
+}
+
+func pix(x, y int, r, g, b float64) *pixel {
+    p := pixel{}
+    p.x, p.y = x, y
+    p.r, p.g, p.b = r, g, b
+    return &p
+}
