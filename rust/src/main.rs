@@ -1,10 +1,18 @@
+#![allow(dead_code)]
+#![allow(non_snake_case)]
 
+use std::time;
 mod img;
 mod mandlebrot;
 mod math;
 
 fn main() {
-    ima()
+    let now = time::Instant::now();
+
+    mandlebrot::mandlebrot();
+    // ima();
+    
+    println!("{:?}", now.elapsed());
 }
 
 fn ima() {

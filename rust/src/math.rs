@@ -1,11 +1,10 @@
 
 pub fn xyrange(pow: f64, x: f64, y: f64) -> (f64, f64, f64, f64) {
-    let nudge = 2.0_f64.powf(pow);
-    // let nudge = f64::powf(2.0, pow);
+    let nudge = 2.0_f64.powf(pow-1.0);
     (x-nudge, x+nudge, y+nudge, y-nudge)
 }
 
-struct MapRange {
+pub struct MapRange {
     scale: f64,
     toff: f64,
     foff: f64,

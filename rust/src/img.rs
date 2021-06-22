@@ -3,7 +3,7 @@ use image::{ImageBuffer, RgbImage};
 use std::path::Path;
 
 pub fn new_img(width: u32, height: u32) -> ImageBuffer<image::Rgb<u8>, std::vec::Vec<u8>> {
-    let mut image: RgbImage = ImageBuffer::new(width, height);
+    let image: RgbImage = ImageBuffer::new(width, height);
     image
 }
 
