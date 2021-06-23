@@ -10,7 +10,7 @@ pub fn new_img(width: u32, height: u32) -> ImageBuffer<image::Rgb<u8>, std::vec:
 // finds what file name is valid
 fn file_name() -> String {
     let mut i = 0;
-    let mut path = String::new();
+    let mut path: String;
     loop {
         path = format!("../images/image{}.png", i);
         if !Path::new(&path).exists() {return path};
