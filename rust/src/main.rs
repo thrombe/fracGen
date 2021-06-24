@@ -7,14 +7,13 @@ mod mandlebrot;
 mod math;
 
 mod mandlebrot_concurrency_testing;
-use mandlebrot_concurrency_testing as tesb;
 
 fn main() {
     let now = time::Instant::now();
 
     mandlebrot::mandlebrot();
     // ima();
-    tesb::tesb();
+    // mandlebrot_concurrency_testing::tesb();
     
     println!("{:?}", now.elapsed());
 }

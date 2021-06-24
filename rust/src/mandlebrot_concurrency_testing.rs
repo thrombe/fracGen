@@ -688,7 +688,7 @@ pub fn mandle_conc_mutex5() { // output work in a image sized channel (crossbeam
     //     worker.join().unwrap();
     // }
 }
-
+ // this will be nice if having both, the image and the output channel in ram is too much. (but will probably never need it)
 pub fn mandle_conc_mutex6() { // 5th but threads directly modify images
     let width: u32 = 2000;
     let height: u32 = 2000;
