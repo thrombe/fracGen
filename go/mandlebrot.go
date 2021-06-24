@@ -31,6 +31,7 @@ func mandlebrot() {
             z += rc
             for i := 0; i < iterations; i++ {
                 z = eq(c, z)
+                // z = z*z + c
                 if real(z)*real(z) + imag(z)*imag(z) > 4 {
                     rad, grn, blu := colSch1(i, iterations)
                     p.r += rad
@@ -65,6 +66,8 @@ func mandlebrot() {
         }
     }
     dumpImg(img)
+
+    shhh(eq)
 }
 
 func colSch1(i, iterations int) (float64, float64, float64) {

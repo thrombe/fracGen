@@ -4,6 +4,7 @@ pub fn xyrange(pow: f64, x: f64, y: f64) -> (f64, f64, f64, f64) {
     (x-nudge, x+nudge, y+nudge, y-nudge)
 }
 
+#[derive(Clone)]
 pub struct MapRange {
     scale: f64,
     toff: f64,
@@ -25,5 +26,4 @@ impl MapRange {
     pub fn map(&self, num: f64) -> f64 {
         (num-self.foff)*self.scale + self.toff
     }
-
 }

@@ -23,8 +23,35 @@ pub fn dump_img(img: ImageBuffer<image::Rgb<u8>, std::vec::Vec<u8>>) {
     img.save(file_name()).unwrap();
 }
 
+pub fn dump_img_mut(img: &mut ImageBuffer<image::Rgb<u8>, std::vec::Vec<u8>>) {
+    img.save(file_name()).unwrap();
+}
+
 // set pixels of image
 #[inline(always)]
 pub fn set(img: &mut ImageBuffer<image::Rgb<u8>, std::vec::Vec<u8>>, x: u32, y: u32, r: f64, g: f64, b: f64) {
     img.put_pixel(x, y, image::Rgb([r as u8, g as u8, b as u8]))
+}
+
+#[allow(non_camel_case_types)]
+pub struct pix {
+    pub x: u32,
+    pub y: u32,
+    pub r: f64,
+    pub g: f64,
+    pub b: f64,
+}
+
+impl pix {
+
+    #[inline(always)]
+    pub fn pixel_create(x: u32, y: u32, r: f64, g: f64, b: f64) -> pix {
+        pix {
+            x,
+            y,
+            r,
+            g,
+            b,
+        }
+    }
 }

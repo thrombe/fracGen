@@ -15,9 +15,10 @@ pub fn mandlebrot() {
     let width: u32 = 2000;
     let height: u32 = 2000;
 
-    let samples = 10;
+    let samples = 4;
     let iterations: u32 = 1000;
     let (xfrom, xto, yfrom, yto) = math::xyrange(-6.0, -0.74571890570893210, -0.11624642707064532);
+    let bailout_val_sq: f64 = 4.0;
 
     let xmap = math::map_range(0.0, width as f64, xfrom, xto);
     let ymap = math::map_range(0.0, height as f64, yfrom, yto);
@@ -41,7 +42,7 @@ pub fn mandlebrot() {
                     z = eq(zx, zy, cx, cy);
                     zx = z.0;
                     zy = z.1;
-                    if zx*zx+zy*zy > 4.0 {
+                    if zx*zx+zy*zy > bailout_val_sq {
                         col_scheme1(&mut r, &mut g, &mut b, i, &dovmap);
                         break
                     }
