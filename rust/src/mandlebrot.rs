@@ -8,7 +8,6 @@ use rand::distributions::{Uniform, Distribution};
 
 use std::thread;
 use std::sync::{Mutex, Arc};
-use crossbeam_channel::bounded as crossbeam_chan;
 
 #[inline(always)]
 fn eq(zx: f64, zy: f64, cx: f64, cy: f64) -> (f64, f64) {
@@ -35,13 +34,13 @@ pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel
     let randoff = Uniform::from(-pix_half_width..pix_half_width);
 
     // some stuff for multi-threading
-    let (outchans, outchanr) = crossbeam_chan((width*height) as usize); // workers submit here
     let mut vec: Vec<u32> = Vec::with_capacity(width as usize);
     for i in 0..width {vec.push(i)}
     let works = Arc::new(Mutex::new(vec)); // workers take work from here
+    let img = Arc::new(Mutex::new(img::new_img(width, height))); // workers directly edit image
 
     for i in 0..cores {
-        let outchan = outchans.clone();
+        let img = Arc::clone(&img);
         let works = Arc::clone(&works);
         let dovmap = dovmap.clone();
         
@@ -76,7 +75,7 @@ pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel
                             }
                         }
                     }
-                    outchan.send(img::pix::pixel_create(x, y, r/sampf64, g/sampf64, b/sampf64)).unwrap();
+                    img::set(&mut img.lock().unwrap(), x, y, r/sampf64, g/sampf64, b/sampf64);
                 }
             }
         };
@@ -87,13 +86,7 @@ pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel
             thread::spawn(process);
         }
     }
-    drop(outchans); // makes sure that the channel is closed once threads are done with it
-
-    let mut img = img::new_img(width, height); // making image
-    for pix in outchanr { // take credit for the worker's work
-    img::set(&mut img, pix.x, pix.y, pix.r, pix.g, pix.b);
-    }
-    img::dump_img(img);
+    img::dump_img_mut(&mut img.lock().unwrap());
 }
 
 #[inline(always)]

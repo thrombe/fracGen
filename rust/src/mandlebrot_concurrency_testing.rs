@@ -601,7 +601,7 @@ pub fn mandle_conc_mutex4() { // similar to version 5 but no refactoring
     }
 }
 
-// best yet (9.7 sec 4 cores)
+// best yet (9.7 sec 4 cores) // channel with big bounds eat a lot of ram (2.6 gigs for 10k*10k image)(maybe)(rough calcs)
 pub fn mandle_conc_mutex5() { // output work in a image sized channel (crossbeam channel is very much faster), 'works' in arc mutex vector
     let width: u32 = 2000;
     let height: u32 = 2000;
@@ -688,7 +688,7 @@ pub fn mandle_conc_mutex5() { // output work in a image sized channel (crossbeam
     //     worker.join().unwrap();
     // }
 }
- // this will be nice if having both, the image and the output channel in ram is too much. (but will probably never need it)
+ // this will be nice if having both, the image and the output channel in ram is too much.
 pub fn mandle_conc_mutex6() { // 5th but threads directly modify images
     let width: u32 = 2000;
     let height: u32 = 2000;
