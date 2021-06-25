@@ -1,18 +1,18 @@
 plan:
   . explain how generation works in comments
-  . implement anti-aliasingbin mandlebrot
-    . try limiting it to selective area (like where there is more detail)
+  /. implement anti-aliasingbin mandlebrot
+    \. try limiting it to selective area (like where there is more detail)
       . how?
-    . is it possible for chaos equations or buddhabrot?
-      . no ig. cuz the points are already rounded to pixels
-  . buddhabrot but include the points that dont cross 2. ie dont ignore points inside mandlebrot set
-    . or only the points that dont cross 2
-  . convolutions on fractals/random images
-    . convolutions for anti-aliasing (bias)
+    \. is it possible for chaos equations or buddhabrot?
+      \. no ig. cuz the points are already rounded to pixels
   . time estimators instead of percentage (wherever applicable)
   . 
 
 try:
+  . buddhabrot but include the points that dont cross 2. ie dont ignore points inside mandlebrot set
+    . or only the points that dont cross 2
+  . convolutions on fractals/random images
+    . convolutions for anti-aliasing (bias)
   . superimpose mandlebrot on top of few already made buddhabrot images but in different color
   . smart long gaussian? blur like the computerphile video
   . the logistic curve or something (veritassium video)
@@ -20,6 +20,14 @@ try:
   . chaos equations from code parade
   . the complex cellular automata from sabestian lague
   . 
+
+rust mandlebrot:
+  . implement a progress thing somehow in the multi-threaded version
+  . try rust mandlebrot in some pc or Google colab (is it really uses all cores)
+  . shift the x loop inside goroutine, just to compare
+  . shit x loop outside the threads, to see how slow it gets.
+  . try threadpool and stuff (rayon ?)
+    . the current methods already provides very close to 4 times performance in 4 cores tho
 
 findsol:
   . try to figure out how many digits are good. ie find the error in calculations

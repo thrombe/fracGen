@@ -14,6 +14,24 @@ fn eq(zx: f64, zy: f64, cx: f64, cy: f64) -> (f64, f64) {
     (zx*zx-zy*zy + cx, 2.0*zx*zy + cy)
 }
 
+#[inline(always)]
+fn col_scheme1(r: &mut f64, g: &mut f64, b: &mut f64, i: u32, dovmap: &math::MapRange) {
+    let it = dovmap.map(i as f64);
+    let mut tmp: f64;
+    
+    tmp = 255.0*(it-PI*(0.5+0.1666666667)).cos();
+    if tmp < 0.0 {tmp = 0.0}
+    *r += tmp;
+
+    tmp = 255.0*it.cos();
+    if tmp < 0.0 {tmp = 0.0}
+    *g += tmp;
+    
+    tmp = 255.0*(it+PI*(0.5+0.1666666667)).cos();
+    if tmp < 0.0 {tmp = 0.0}
+    *b += tmp;
+}
+
 pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel is very much faster), 'works' in arc mutex vector
     let width: u32 = 2000;
     let height: u32 = 2000;
@@ -87,22 +105,4 @@ pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel
         }
     }
     img::dump_img_mut(&mut img.lock().unwrap());
-}
-
-#[inline(always)]
-fn col_scheme1(r: &mut f64, g: &mut f64, b: &mut f64, i: u32, dovmap: &math::MapRange) {
-    let it = dovmap.map(i as f64);
-    let mut tmp: f64;
-    
-    tmp = 255.0*(it-PI*(0.5+0.1666666667)).cos();
-    if tmp < 0.0 {tmp = 0.0}
-    *r += tmp;
-
-    tmp = 255.0*it.cos();
-    if tmp < 0.0 {tmp = 0.0}
-    *g += tmp;
-    
-    tmp = 255.0*(it+PI*(0.5+0.1666666667)).cos();
-    if tmp < 0.0 {tmp = 0.0}
-    *b += tmp;
 }

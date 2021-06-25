@@ -22,36 +22,36 @@ func mandlebrot() {
     ymap := mapRange(0, float64(height), yfrom, yto)
     pixwidth := (xto-xfrom)/float64(width)
 
-    getpix := func(x, y int, out chan *pixel, workers chan struct{}) {
-        c := complex(xmap(float64(x)), ymap(float64(y)))
-        p := pix(x, y, 0, 0, 0)
-        for s := 0; s < samples; s++ {
-            z := c
-            rc := complex((rand.Float64()-0.5)*pixwidth, (rand.Float64()-0.5)*pixwidth)
-            z += rc
-            for i := 0; i < iterations; i++ {
-                z = eq(c, z)
-                // z = z*z + c
-                if real(z)*real(z) + imag(z)*imag(z) > 4 {
-                    rad, grn, blu := colSch1(i, iterations)
-                    p.r += rad
-                    p.g += grn
-                    p.b += blu
-                    break
+    getpix := func(y int, out chan *pixel, workers chan struct{}) {
+        for x := 0; x < width; x++ {
+            c := complex(xmap(float64(x)), ymap(float64(y)))
+            p := pix(x, y, 0, 0, 0)
+            for s := 0; s < samples; s++ {
+                z := c
+                rc := complex((rand.Float64()-0.5)*pixwidth, (rand.Float64()-0.5)*pixwidth)
+                z += rc
+                for i := 0; i < iterations; i++ {
+                    z = eq(c, z)
+                    // z = z*z + c
+                    if real(z)*real(z) + imag(z)*imag(z) > 4 {
+                        rad, grn, blu := colSch1(i, iterations)
+                        p.r += rad
+                        p.g += grn
+                        p.b += blu
+                        break
+                    }
                 }
             }
+            p.scalecolor(1/float64(samples))
+            out <- p
         }
-        p.scalecolor(1/float64(samples))
-        out <- p
         <- workers
     }
 
     go func(out chan *pixel, workers chan struct{}) { // creating more workers as needed
         for y := 0; y < height; y++ {
-            for x := 0; x < width; x++ {
-                workers <- struct{}{}
-                go getpix(x, y, out, workers)
-            }
+            workers <- struct{}{}
+            go getpix(y, out, workers)
         }
     }(out, workers)
 
