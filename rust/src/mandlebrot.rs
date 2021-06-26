@@ -46,10 +46,12 @@ pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel
     // setting up some variables
     let xmap = math::map_range(0.0, width as f64, xfrom, xto);
     let ymap = math::map_range(0.0, height as f64, yfrom, yto);
-    let pix_half_width = (xto-xfrom)/(2.0*width as f64);
     let sampf64 = samples as f64;
     let rng = StdRng::from_entropy();
-    let randoff = Uniform::from(-pix_half_width..pix_half_width);
+    let randoff = {
+        let pix_half_width = (xto-xfrom)/(2.0*width as f64);
+        Uniform::from(-pix_half_width..pix_half_width)
+    };
 
     // some stuff for multi-threading
     let mut vec: Vec<u32> = Vec::with_capacity(width as usize);

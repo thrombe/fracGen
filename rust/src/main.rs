@@ -5,13 +5,15 @@ use std::time;
 mod img;
 mod mandlebrot;
 mod math;
+mod buddhabrot;
 
 mod mandlebrot_concurrency_testing;
 
 fn main() {
     let now = time::Instant::now();
 
-    mandlebrot::mandlebrot();
+    // mandlebrot::mandlebrot();
+    buddhabrot::buddhabrot();
     // ima();
     // mandlebrot_concurrency_testing::tesb();
     

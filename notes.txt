@@ -1,10 +1,7 @@
 plan:
   . explain how generation works in comments
-  /. implement anti-aliasingbin mandlebrot
-    \. try limiting it to selective area (like where there is more detail)
-      . how?
-    \. is it possible for chaos equations or buddhabrot?
-      \. no ig. cuz the points are already rounded to pixels
+  \. try limiting anti-aliasing to selective area (like where there is more detail)
+    \. how?
   . time estimators instead of percentage (wherever applicable)
   . 
 
@@ -21,10 +18,25 @@ try:
   . the complex cellular automata from sabestian lague
   . 
 
+rust stuff:
+  . use command line arguments for ease
+  . 
+
+rust buddhabrot:
+  . micro-optimisations
+  . make board smaller (perhaps u16 or something)
+  . make it easier to change parameters. i.e. bring the playable parameters atbone place
+  . figure out which rng is better for this
+  . 
+
 rust mandlebrot:
+  . use a seperate board for each thread and dont use communal memory to distribute
+    work, instead just split work evenly by numbers. this makes program use 100% of cpu (all 8 cores)
+    . board can be (u8, u8, u8) and also dosent need to be full board, just the portion assigned to
+      the thread
+  . use the rng that is used in buddhabrot (exclusive range)
   . implement a progress thing somehow in the multi-threaded version
   . try rust mandlebrot in some pc or Google colab (is it really uses all cores)
-  . shift the x loop inside goroutine, just to compare
   . shit x loop outside the threads, to see how slow it gets.
   . try threadpool and stuff (rayon ?)
     . the current methods already provides very close to 4 times performance in 4 cores tho
