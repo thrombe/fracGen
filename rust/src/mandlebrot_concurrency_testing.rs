@@ -153,9 +153,9 @@ pub fn mandle_conc_cross() {
     let iterations: u32 = 1000;
     let (xfrom, xto, yfrom, yto) = math::xyrange(-6.0, -0.74571890570893210, -0.11624642707064532);
 
-    let xmap = math::map_range(0.0, width as f64, xfrom, xto);
-    let ymap = math::map_range(0.0, height as f64, yfrom, yto);
-    let dovmap = math::map_range(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
+    let xmap = math::MapRange::new(0.0, width as f64, xfrom, xto);
+    let ymap = math::MapRange::new(0.0, height as f64, yfrom, yto);
+    let dovmap = math::MapRange::new(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
     let pix_half_width = (xto-xfrom)/(2.0*width as f64);
     let sampf64 = samples as f64;
     let rng = StdRng::from_entropy();
@@ -240,9 +240,9 @@ pub fn mandle_conc_mutex() {
     let iterations: u32 = 1000;
     let (xfrom, xto, yfrom, yto) = math::xyrange(-6.0, -0.74571890570893210, -0.11624642707064532);
 
-    let xmap = math::map_range(0.0, width as f64, xfrom, xto);
-    let ymap = math::map_range(0.0, height as f64, yfrom, yto);
-    let dovmap = math::map_range(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
+    let xmap = math::MapRange::new(0.0, width as f64, xfrom, xto);
+    let ymap = math::MapRange::new(0.0, height as f64, yfrom, yto);
+    let dovmap = math::MapRange::new(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
     let pix_half_width = (xto-xfrom)/(2.0*width as f64);
     let sampf64 = samples as f64;
     let rng = StdRng::from_entropy();
@@ -326,9 +326,9 @@ pub fn mandle_conc_mutex2() { // with works as mutable atomic (or something) vec
     let iterations: u32 = 1000;
     let (xfrom, xto, yfrom, yto) = math::xyrange(-6.0, -0.74571890570893210, -0.11624642707064532);
 
-    let xmap = math::map_range(0.0, width as f64, xfrom, xto);
-    let ymap = math::map_range(0.0, height as f64, yfrom, yto);
-    let dovmap = math::map_range(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
+    let xmap = math::MapRange::new(0.0, width as f64, xfrom, xto);
+    let ymap = math::MapRange::new(0.0, height as f64, yfrom, yto);
+    let dovmap = math::MapRange::new(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
     let pix_half_width = (xto-xfrom)/(2.0*width as f64);
     let sampf64 = samples as f64;
     let rng = StdRng::from_entropy();
@@ -415,9 +415,9 @@ pub fn mandle_conc_mutex3() { // with both out and works as mutable atomic (or s
     let iterations: u32 = 1000;
     let (xfrom, xto, yfrom, yto) = math::xyrange(-6.0, -0.74571890570893210, -0.11624642707064532);
 
-    let xmap = math::map_range(0.0, width as f64, xfrom, xto);
-    let ymap = math::map_range(0.0, height as f64, yfrom, yto);
-    let dovmap = math::map_range(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
+    let xmap = math::MapRange::new(0.0, width as f64, xfrom, xto);
+    let ymap = math::MapRange::new(0.0, height as f64, yfrom, yto);
+    let dovmap = math::MapRange::new(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
     let pix_half_width = (xto-xfrom)/(2.0*width as f64);
     let sampf64 = samples as f64;
     let mut rng = StdRng::from_entropy();
@@ -512,9 +512,9 @@ pub fn mandle_conc_mutex4() { // similar to version 5 but no refactoring
     let iterations: u32 = 1000;
     let (xfrom, xto, yfrom, yto) = math::xyrange(-6.0, -0.74571890570893210, -0.11624642707064532);
 
-    let xmap = math::map_range(0.0, width as f64, xfrom, xto);
-    let ymap = math::map_range(0.0, height as f64, yfrom, yto);
-    let dovmap = math::map_range(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
+    let xmap = math::MapRange::new(0.0, width as f64, xfrom, xto);
+    let ymap = math::MapRange::new(0.0, height as f64, yfrom, yto);
+    let dovmap = math::MapRange::new(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
     let pix_half_width = (xto-xfrom)/(2.0*width as f64);
     let sampf64 = samples as f64;
     let mut rng = StdRng::from_entropy();
@@ -610,12 +610,12 @@ pub fn mandle_conc_mutex5() { // output work in a image sized channel (crossbeam
     let samples = 4;
     let iterations: u32 = 1000;
     let (xfrom, xto, yfrom, yto) = math::xyrange(-6.0, -0.74571890570893210, -0.11624642707064532);
-    let dovmap = math::map_range(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
+    let dovmap = math::MapRange::new(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
     let bailout_val_sq: f64 = 4.0;
 
     // setting up some variables
-    let xmap = math::map_range(0.0, width as f64, xfrom, xto);
-    let ymap = math::map_range(0.0, height as f64, yfrom, yto);
+    let xmap = math::MapRange::new(0.0, width as f64, xfrom, xto);
+    let ymap = math::MapRange::new(0.0, height as f64, yfrom, yto);
     let pix_half_width = (xto-xfrom)/(2.0*width as f64);
     let sampf64 = samples as f64;
     let rng = StdRng::from_entropy();
@@ -697,12 +697,12 @@ pub fn mandle_conc_mutex6() { // 5th but threads directly modify images
     let samples = 4;
     let iterations: u32 = 1000;
     let (xfrom, xto, yfrom, yto) = math::xyrange(-6.0, -0.74571890570893210, -0.11624642707064532);
-    let dovmap = math::map_range(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
+    let dovmap = math::MapRange::new(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
     let bailout_val_sq: f64 = 4.0;
 
     // setting up some variables
-    let xmap = math::map_range(0.0, width as f64, xfrom, xto);
-    let ymap = math::map_range(0.0, height as f64, yfrom, yto);
+    let xmap = math::MapRange::new(0.0, width as f64, xfrom, xto);
+    let ymap = math::MapRange::new(0.0, height as f64, yfrom, yto);
     let pix_half_width = (xto-xfrom)/(2.0*width as f64);
     let sampf64 = samples as f64;
     let rng = StdRng::from_entropy();

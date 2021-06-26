@@ -27,6 +27,7 @@ rust buddhabrot:
   . make board smaller (perhaps u16 or something)
   . make it easier to change parameters. i.e. bring the playable parameters atbone place
   . figure out which rng is better for this
+  . try using complex nunmbers instead of zx, zy (will need to create those first)
   . 
 
 rust mandlebrot:

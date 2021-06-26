@@ -12,32 +12,38 @@ use rand::distributions::{Uniform, Distribution};
 use std::thread;
 use std::sync::{Mutex, Arc};
 
-#[inline(always)]
-fn eq(zx: f64, zy: f64, cx: f64, cy: f64) -> (f64, f64) {
-    (zx*zx-zy*zy + cx, 2.0*zx*zy + cy)
-}
-
 pub fn buddhabrot() { // output work in a image sized channel (crossbeam channel is very much faster), 'works' in arc mutex vector
-    let width: u32 = 3000;
-    let height: u32 = 3000;
-    let cores = 8;
-    let iterations: u32 = 100_000;
-    let trajectories: u32 = 1000_000;
+    let width: i32 = 3000;
+    let height: i32 = 3000;
+    let cores = 7;
+    let iterations: u32 = 1000_000;
+    let trajectories: u32 = 100_000;
     let bailout_val_sq: f64 = 4.0;
     let ignore_first_n_iterations = 0; // dont color first few points of every trajectory
     let min_iteration_threshold = 2; // dont accept the trajectory if it has less points
     let (xfrom, xto, yfrom, yto) = math::xyrange(2.0, 0.0, 0.0);
-    let colmap = math::map_range(0.0, (iterations as f64).log(2.0)*2.0, 0.0, 255.0);
+    let colmap = math::MapRange::new(0.0, (iterations as f64).log(2.0)*2.5, 0.0, 255.0);
 
+    #[inline(always)]
+    fn eq(zx: f64, zy: f64, cx: f64, cy: f64) -> (f64, f64) {
+        (zx*zx-zy*zy + cx, 2.0*zx*zy + cy)
+    }
+    #[inline(always)]
+    fn submit_color(colmap: &math::MapRange, color: u16) -> u8 { // this gets chopped into [0, 255]
+        colmap.map(color as f64) as u8
+        // (color%255) as u8
+    }
+    
     // setting up some variables
     let randoff = Uniform::new(-2.0, 2.0);
     let rng = StdRng::from_entropy();
 
     // some stuff for multi-threading
-    let board = vec![vec![0u32; width as usize]; height as usize]; // communal board
+    let board = vec![vec![0u16; width as usize]; height as usize]; // communal board (is u16 fine here? 65_535)
     let board = Arc::new(Mutex::new(board));
     let work_per_thread = trajectories/cores;
     let leftover_work = trajectories - work_per_thread*cores;
+    let mut worker_vec = vec![];
 
     for i in 0..cores {
         let board = Arc::clone(&board);
@@ -46,13 +52,13 @@ pub fn buddhabrot() { // output work in a image sized channel (crossbeam channel
         // let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(676);
         
         // create some stuff per thread cuz the threads need their own stuff. children cant share stuff. smh spoiled kids
-        let xmap = math::map_range(xfrom, xto, 0.0, width as f64);
-        let ymap = math::map_range(yfrom, yto, 0.0, height as f64);
+        let xmap = math::MapRange::new(xfrom, xto, 0.0, width as f64);
+        let ymap = math::MapRange::new(yfrom, yto, 0.0, height as f64);
 
         let mut process = move || {
             // let mut rng = rand::thread_rng();
             let mut j = 0;
-            let mut self_board = vec![vec![0u32; width as usize]; height as usize];
+            let mut self_board = vec![vec![0u16; width as usize]; height as usize];
             while j < work_per_thread {
             
                 let mut z: (f64, f64); // convert into struct + try the use of '*' and stuff (idk how)
@@ -66,7 +72,7 @@ pub fn buddhabrot() { // output work in a image sized channel (crossbeam channel
                 for i in 0..iterations {
                     index = (xmap.map(zx).round() as i32, ymap.map(zy).round() as i32);
                     if (index.0 > 0) && (index.1 > 0) &&
-                       (index.0 < width as i32) && (index.1 < height as i32) &&
+                       (index.0 < width) && (index.1 < height) &&
                        (i >= ignore_first_n_iterations) {
                         traj.push((index.0 as usize, index.1 as usize));
                     }
@@ -97,28 +103,31 @@ pub fn buddhabrot() { // output work in a image sized channel (crossbeam channel
             process();
             break
         } else {
-            thread::spawn(process);
+            let worker = thread::spawn(process);
+            worker_vec.push(worker);
         }
     }
 
+    for worker in worker_vec { // making sure every child thread is dead
+        worker.join().unwrap();
+    }
     let board = board.lock().unwrap();
+
     // let mut max = 0;
-    // let mut i: u32;
+    // let mut i: u16;
     // for y in 0..(height as usize) {
     //     for x in 0..(width as usize) {
     //         i = board[y][x];
     //         if i > max {max = i}
     //     }
     // }
-    // shift the max input range up somehow, is max needed?
-    // if max isnt needed, shift colmap up
-    // also, another func can be used while setting pixel (for color) (for the value that goes in colmap)
-    // let colmap = math::map_range(0.0, (max as f64).log(2.0)*2.0, 0.0, 255.0);
+    // let colmap = math::MapRange::new(0.0, (max as f64)/60.0, 0.0, 255.0);
 
-    let mut img = img::new_img(width, height);
+    let mut img = img::new_img(width as u32, height as u32);
     for y in 0..(height as usize) {
         for x in 0..(width as usize) {
-            img::set(&mut img, x as u32, y as u32, 0.0, colmap.map(board[y][x] as f64), 0.0)
+            // img::set(&mut img, x as u32, y as u32, 0.0, submit_color(&colmap, board[y][x]), 0.0);
+            img::set_u8(&mut img, x as u32, y as u32, 0, submit_color(&colmap, board[y][x]), 0);
         }
     }
     img::dump_img(img);

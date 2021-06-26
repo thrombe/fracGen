@@ -33,6 +33,12 @@ pub fn set(img: &mut ImageBuffer<image::Rgb<u8>, std::vec::Vec<u8>>, x: u32, y: 
     img.put_pixel(x, y, image::Rgb([r as u8, g as u8, b as u8]))
 }
 
+// set pixels of image
+#[inline(always)]
+pub fn set_u8(img: &mut ImageBuffer<image::Rgb<u8>, std::vec::Vec<u8>>, x: u32, y: u32, r: u8, g: u8, b: u8) {
+    img.put_pixel(x, y, image::Rgb([r, g, b]))
+}
+
 #[allow(non_camel_case_types)]
 pub struct pix {
     pub x: u32,

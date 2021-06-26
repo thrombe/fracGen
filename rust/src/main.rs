@@ -12,8 +12,8 @@ mod mandlebrot_concurrency_testing;
 fn main() {
     let now = time::Instant::now();
 
-    // mandlebrot::mandlebrot();
-    buddhabrot::buddhabrot();
+    mandlebrot::mandlebrot();
+    // buddhabrot::buddhabrot();
     // ima();
     // mandlebrot_concurrency_testing::tesb();
     
