@@ -33,56 +33,50 @@ fn col_scheme1(r: &mut f64, g: &mut f64, b: &mut f64, i: u32, dovmap: &math::Map
 }
 
 pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel is very much faster), 'works' in arc mutex vector
-    let width: u32 = 2000;
-    let height: u32 = 2000;
-    let cores = 4;
-
+    let width: usize = 2000;
+    let height: usize = 2000;
+    let cores = 7;
     let samples = 4;
     let iterations: u32 = 1000;
     let (xfrom, xto, yfrom, yto) = math::xyrange(-6.0, -0.74571890570893210, -0.11624642707064532);
-    let dovmap = math::map_range(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
+    let dovmap = math::MapRange::new(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
     let bailout_val_sq: f64 = 4.0;
 
     // setting up some variables
-    let xmap = math::map_range(0.0, width as f64, xfrom, xto);
-    let ymap = math::map_range(0.0, height as f64, yfrom, yto);
+    let xmap = math::MapRange::new(0.0, width as f64, xfrom, xto);
+    let ymap = math::MapRange::new(0.0, height as f64, yfrom, yto);
     let sampf64 = samples as f64;
     let rng = StdRng::from_entropy();
     let randoff = {
         let pix_half_width = (xto-xfrom)/(2.0*width as f64);
-        Uniform::from(-pix_half_width..pix_half_width)
+        Uniform::new(-pix_half_width, pix_half_width)
     };
 
     // some stuff for multi-threading
-    let mut vec: Vec<u32> = Vec::with_capacity(width as usize);
-    for i in 0..width {vec.push(i)}
-    let works = Arc::new(Mutex::new(vec)); // workers take work from here
-    let img = Arc::new(Mutex::new(img::new_img(width, height))); // workers directly edit image
+    let work_per_thread = height/cores;
+    let leftover_work = height-work_per_thread*cores;
+    let img = Arc::new(Mutex::new(img::new_img(width as u32, height as u32))); // workers directly edit image
+    let mut worker_vec = vec![];
 
     for i in 0..cores {
         let img = Arc::clone(&img);
-        let works = Arc::clone(&works);
         let dovmap = dovmap.clone();
         
         // cloning some stuff cuz the threads need their own stuff. children cant share stuff. smh spoiled kids
         let xmap = xmap.clone();
         let ymap = ymap.clone();
         let mut rng = rng.clone();
+        let thread_y = i*work_per_thread;
 
         let mut process = move || {
-            let mut y: u32;
-            loop {
-                // the lock on 'works' ends with the match block
-                match works.lock().unwrap().pop() { // finding work
-                    Some(val) => y = val,
-                    None => break,
-                }
+            let mut self_board = vec![vec![(0u8, 0u8, 0u8); width as usize]; work_per_thread as usize];
+            for y in 0..work_per_thread {
                 for x in 0..width {
                     let mut z: (f64, f64);
                     let (mut r, mut g, mut b) = (0.0, 0.0, 0.0);
                     for _ in 0..samples {
                         let cx = xmap.map(x as f64) + randoff.sample(&mut rng);
-                        let cy = ymap.map(y as f64) + randoff.sample(&mut rng);
+                        let cy = ymap.map((y+thread_y) as f64) + randoff.sample(&mut rng);
                         let mut zx = cx;
                         let mut zy = cy;
                         for i in 0..iterations {
@@ -95,16 +89,32 @@ pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel
                             }
                         }
                     }
-                    img::set(&mut img.lock().unwrap(), x, y, r/sampf64, g/sampf64, b/sampf64);
+                    self_board[y][x] = ((r/sampf64) as u8, (g/sampf64) as u8, (b/sampf64) as u8);
+                }
+            }
+            let mut col: (u8, u8, u8);
+            let mut img = img.lock().unwrap();
+            for y in 0..work_per_thread {
+                for x in 0..width {
+                    col = self_board[y][x];
+                    img::set_u8(&mut img, x as u32, (y+thread_y) as u32, col.0, col.1, col.2);
                 }
             }
         };
         if i == cores-1 { // running last one on main thread and rest on children threads
+            #[allow(unused_variables)]
+            let work_per_thread = work_per_thread+leftover_work;
             process();
             break
         } else {
-            thread::spawn(process);
+            let worker = thread::spawn(process);
+            worker_vec.push(worker);
         }
     }
+    
+    for worker in worker_vec { // making sure every thread is dead
+        worker.join().unwrap();
+    }
+
     img::dump_img_mut(&mut img.lock().unwrap());
 }
