@@ -10,6 +10,8 @@ try:
     . or only the points that dont cross 2
   . convolutions on fractals/random images
     . convolutions for anti-aliasing (bias)
+  . mandlebrot, but mirror the point so that it always stays in the first quadrant
+    . or some other variations of this kind
   . superimpose mandlebrot on top of few already made buddhabrot images but in different color
   . smart long gaussian? blur like the computerphile video
   . the logistic curve or something (veritassium video)
@@ -23,24 +25,16 @@ rust stuff:
   . 
 
 rust buddhabrot:
-  . micro-optimisations
-  . make board smaller (perhaps u16 or something)
   . make it easier to change parameters. i.e. bring the playable parameters atbone place
   . figure out which rng is better for this
   . try using complex nunmbers instead of zx, zy (will need to create those first)
   . 
 
 rust mandlebrot:
-  . use a seperate board for each thread and dont use communal memory to distribute
-    work, instead just split work evenly by numbers. this makes program use 100% of cpu (all 8 cores)
-    . board can be (u8, u8, u8) and also dosent need to be full board, just the portion assigned to
-      the thread
-  . use the rng that is used in buddhabrot (exclusive range)
-  . implement a progress thing somehow in the multi-threaded version
-  . try rust mandlebrot in some pc or Google colab (is it really uses all cores)
-  . shit x loop outside the threads, to see how slow it gets.
+  . use the rng that is used in buddhabrot
+  . shift x loop outside the threads, to see how slow it gets.
   . try threadpool and stuff (rayon ?)
-    . the current methods already provides very close to 4 times performance in 4 cores tho
+    . the current methods already provides good performance for every core tho
 
 findsol:
   . try to figure out how many digits are good. ie find the error in calculations

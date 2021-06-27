@@ -35,8 +35,8 @@ fn col_scheme1(r: &mut f64, g: &mut f64, b: &mut f64, i: u32, dovmap: &math::Map
 pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel is very much faster), 'works' in arc mutex vector
     let width: usize = 2000;
     let height: usize = 2000;
-    let cores = 7;
-    let samples = 4;
+    let cores: usize = 7;
+    let samples: usize = 4;
     let iterations: u32 = 1000;
     let (xfrom, xto, yfrom, yto) = math::xyrange(-6.0, -0.74571890570893210, -0.11624642707064532);
     let dovmap = math::MapRange::new(0.0, (iterations as f64)/69.0f64, 0.0, FRAC_PI_2);
@@ -69,6 +69,7 @@ pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel
         let thread_y = i*work_per_thread;
 
         let mut process = move || {
+            let mut indicator = super::ProgressIndicator::new(work_per_thread);
             let mut self_board = vec![vec![(0u8, 0u8, 0u8); width as usize]; work_per_thread as usize];
             for y in 0..work_per_thread {
                 for x in 0..width {
@@ -91,6 +92,7 @@ pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel
                     }
                     self_board[y][x] = ((r/sampf64) as u8, (g/sampf64) as u8, (b/sampf64) as u8);
                 }
+                if i == 0 {indicator.indicate(y)} // progress indicator
             }
             let mut col: (u8, u8, u8);
             let mut img = img.lock().unwrap();

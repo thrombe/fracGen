@@ -2,25 +2,24 @@
 use super::math;
 use super::img;
 
-use rand::SeedableRng;
+use rand::SeedableRng; // for rng
 use rand::rngs::StdRng;
 use rand::distributions::{Uniform, Distribution};
-
 // use rand_chacha; // i think chacha was faster than from_entropy()
 // use rand::distributions::{Standard, Open01};
 
-use std::thread;
+use std::thread; // for multi-threading
 use std::sync::{Mutex, Arc};
 
-pub fn buddhabrot() { // output work in a image sized channel (crossbeam channel is very much faster), 'works' in arc mutex vector
-    let width: i32 = 3000;
-    let height: i32 = 3000;
-    let cores = 7;
-    let iterations: u32 = 1000_000;
-    let trajectories: u32 = 100_000;
+pub fn buddhabrot() {
+    let width: i32 = 1000;
+    let height: i32 = 1000;
+    let cores: usize = 7;
+    let iterations: usize = 100_000;
+    let trajectories: usize = 100_000;
     let bailout_val_sq: f64 = 4.0;
-    let ignore_first_n_iterations = 0; // dont color first few points of every trajectory
-    let min_iteration_threshold = 2; // dont accept the trajectory if it has less points
+    let ignore_first_n_iterations: usize = 0; // dont color first few points of every trajectory
+    let min_iteration_threshold: usize = 2; // dont accept the trajectory if it has less points
     let (xfrom, xto, yfrom, yto) = math::xyrange(2.0, 0.0, 0.0);
     let colmap = math::MapRange::new(0.0, (iterations as f64).log(2.0)*2.5, 0.0, 255.0);
 
@@ -32,6 +31,7 @@ pub fn buddhabrot() { // output work in a image sized channel (crossbeam channel
     fn submit_color(colmap: &math::MapRange, color: u16) -> u8 { // this gets chopped into [0, 255]
         colmap.map(color as f64) as u8
         // (color%255) as u8
+        // 1/(1+e^-x) or something
     }
     
     // setting up some variables
@@ -56,6 +56,7 @@ pub fn buddhabrot() { // output work in a image sized channel (crossbeam channel
         let ymap = math::MapRange::new(yfrom, yto, 0.0, height as f64);
 
         let mut process = move || {
+            let mut indicator = super::ProgressIndicator::new(work_per_thread);
             // let mut rng = rand::thread_rng();
             let mut j = 0;
             let mut self_board = vec![vec![0u16; width as usize]; height as usize];
@@ -89,6 +90,7 @@ pub fn buddhabrot() { // output work in a image sized channel (crossbeam channel
                     zx = z.0;
                     zy = z.1;
                 }
+                if i == 0 {indicator.indicate(j)} // progress indicator
             }
             let mut board = board.lock().unwrap();
             for y in 0..(height as usize) {
