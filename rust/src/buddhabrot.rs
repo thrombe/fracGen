@@ -1,6 +1,7 @@
 
 use super::math;
 use super::img;
+use super::progress_indicator::ProgressIndicator;
 
 use rand::SeedableRng; // for rng
 use rand::rngs::StdRng;
@@ -56,7 +57,7 @@ pub fn buddhabrot() {
         let ymap = math::MapRange::new(yfrom, yto, 0.0, height as f64);
 
         let mut process = move || {
-            let mut indicator = super::ProgressIndicator::new(work_per_thread);
+            let mut indicator = ProgressIndicator::new(work_per_thread);
             // let mut rng = rand::thread_rng();
             let mut j = 0;
             let mut self_board = vec![vec![0u16; width as usize]; height as usize];

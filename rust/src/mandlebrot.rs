@@ -1,6 +1,7 @@
 
 use super::math;
 use super::img;
+use super::progress_indicator::ProgressIndicator;
 use std::f64::consts::{PI, FRAC_PI_2};
 use rand::SeedableRng;
 use rand::rngs::StdRng;
@@ -69,7 +70,7 @@ pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel
         let thread_y = i*work_per_thread;
 
         let mut process = move || {
-            let mut indicator = super::ProgressIndicator::new(work_per_thread);
+            let mut indicator = ProgressIndicator::new(work_per_thread);
             let mut self_board = vec![vec![(0u8, 0u8, 0u8); width as usize]; work_per_thread as usize];
             for y in 0..work_per_thread {
                 for x in 0..width {
