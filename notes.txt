@@ -6,13 +6,11 @@ plan:
   . 
 
 try:
-  . buddhabrot but include the points that dont cross 2. ie dont ignore points inside mandlebrot set
-    . or only the points that dont cross 2
   . convolutions on fractals/random images
     . convolutions for anti-aliasing (bias)
   . mandlebrot, but mirror the point so that it always stays in the first quadrant
     . or some other variations of this kind
-  . superimpose mandlebrot on top of few already made buddhabrot images but in different color
+  \. superimpose mandlebrot on top of few already made buddhabrot images but in different color
   . smart long gaussian? blur like the computerphile video
   . the logistic curve or something (veritassium video)
   . lorenz attractor and ++ +3d?
@@ -25,7 +23,7 @@ rust stuff:
   . 
 
 rust buddhabrot:
-  . make it easier to change parameters. i.e. bring the playable parameters atbone place
+  . make it easier to change parameters. i.e. bring the playable parameters at one place
   . figure out which rng is better for this
   . try using complex nunmbers instead of zx, zy (will need to create those first)
   . 

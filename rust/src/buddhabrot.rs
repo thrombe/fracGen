@@ -19,8 +19,9 @@ pub fn buddhabrot() {
     let iterations: usize = 100_000;
     let trajectories: usize = 100_000;
     let bailout_val_sq: f64 = 4.0;
+    let anti: bool = false; // if true, includes trajectories even if they lie in the mandlebrot set
     let ignore_first_n_iterations: usize = 0; // dont color first few points of every trajectory
-    let min_iteration_threshold: usize = 2; // dont accept the trajectory if it has less points
+    let min_iteration_threshold: usize = 2; // dont accept the trajectory if it has less points (not for anti)
     let (xfrom, xto, yfrom, yto) = math::xyrange(2.0, 0.0, 0.0);
     let colmap = math::MapRange::new(0.0, (iterations as f64).log(2.0)*2.5, 0.0, 255.0);
 
@@ -32,6 +33,7 @@ pub fn buddhabrot() {
     fn submit_color(colmap: &math::MapRange, color: u16) -> u8 { // this gets chopped into [0, 255]
         colmap.map(color as f64) as u8
         // (color%255) as u8
+        // ((colmap.map(color as f64) as u16)%255) as u8
         // 1/(1+e^-x) or something
     }
     
@@ -45,6 +47,15 @@ pub fn buddhabrot() {
     let work_per_thread = trajectories/cores;
     let leftover_work = trajectories - work_per_thread*cores;
     let mut worker_vec = vec![];
+
+    #[inline(always)]
+    fn add_traj(traj: &Vec<(usize, usize)>,
+     self_board: &mut std::vec::Vec<std::vec::Vec<u16>>, j: &mut usize) {
+       for (x, y) in traj {
+           self_board[*y][*x] += 1;
+       }
+       *j += 1;
+    }
 
     for i in 0..cores {
         let board = Arc::clone(&board);
@@ -71,27 +82,25 @@ pub fn buddhabrot() {
                 
                 let mut traj: Vec<(usize, usize)> = Vec::with_capacity(iterations as usize);
                 let mut index: (i32, i32);
+
                 for i in 0..iterations {
                     index = (xmap.map(zx).round() as i32, ymap.map(zy).round() as i32);
-                    if (index.0 > 0) && (index.1 > 0) &&
+                    if (index.0 > 0) && (index.1 > 0) && // if inside image, include it
                        (index.0 < width) && (index.1 < height) &&
                        (i >= ignore_first_n_iterations) {
                         traj.push((index.0 as usize, index.1 as usize));
                     }
                     if zx*zx+zy*zy > bailout_val_sq {
-                        // let mut board = board.lock().unwrap();
-                        if i < min_iteration_threshold {break}
-                        for (x, y) in traj {
-                            self_board[y][x] += 1;
-                        }
-                        j += 1;
+                        if anti || (i < min_iteration_threshold) {break}
+                        add_traj(&traj, &mut self_board, &mut j);
                         break
                     }
                     z = eq(zx, zy, cx, cy);
                     zx = z.0;
                     zy = z.1;
                 }
-                if i == 0 {indicator.indicate(j)} // progress indicator
+                if anti {add_traj(&traj, &mut self_board, &mut j)}
+                if i == cores-1 {indicator.indicate(j)} // progress indicator
             }
             let mut board = board.lock().unwrap();
             for y in 0..(height as usize) {
@@ -129,7 +138,6 @@ pub fn buddhabrot() {
     let mut img = img::new_img(width as u32, height as u32);
     for y in 0..(height as usize) {
         for x in 0..(width as usize) {
-            // img::set(&mut img, x as u32, y as u32, 0.0, submit_color(&colmap, board[y][x]), 0.0);
             img::set_u8(&mut img, x as u32, y as u32, 0, submit_color(&colmap, board[y][x]), 0);
         }
     }
