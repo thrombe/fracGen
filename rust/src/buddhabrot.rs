@@ -3,8 +3,8 @@ use super::math;
 use super::img;
 use super::progress_indicator::ProgressIndicator;
 
-use rand::SeedableRng; // for rng
-use rand::rngs::StdRng;
+// use rand::SeedableRng; // for rng
+// use rand::rngs::StdRng;
 use rand::distributions::{Uniform, Distribution};
 // use rand_chacha; // i think chacha was faster than from_entropy()
 // use rand::distributions::{Standard, Open01};
@@ -12,12 +12,12 @@ use rand::distributions::{Uniform, Distribution};
 use std::thread; // for multi-threading
 use std::sync::{Mutex, Arc};
 
-pub fn buddhabrot() {
-    let width: i32 = 1000;
-    let height: i32 = 1000;
+pub fn buddhabrot() { // 3.5 for the good 5k image(10^5, 10^7), (1.5(its a tid bit dark), 10k)
+    let width: i32 = 10000;
+    let height: i32 = 10000;
     let cores: usize = 7;
-    let iterations: usize = 100_000;
-    let trajectories: usize = 100_000;
+    let iterations: usize = 1000_000;
+    let trajectories: usize = 1000_000; // should be linearly proportional to the generation time
     let bailout_val_sq: f64 = 4.0;
     let anti: bool = false; // if true, includes trajectories even if they lie in the mandlebrot set
     let ignore_first_n_iterations: usize = 0; // dont color first few points of every trajectory
@@ -37,41 +37,45 @@ pub fn buddhabrot() {
         // 1/(1+e^-x) or something
     }
     
-    // setting up some variables
-    let randoff = Uniform::new(-2.0, 2.0);
-    let rng = StdRng::from_entropy();
-
     // some stuff for multi-threading
     let board = vec![vec![0u16; width as usize]; height as usize]; // communal board (is u16 fine here? 65_535)
     let board = Arc::new(Mutex::new(board));
     let work_per_thread = trajectories/cores;
     let leftover_work = trajectories - work_per_thread*cores;
     let mut worker_vec = vec![];
+    
+    const ISHTOP: u16 = !1;
 
     #[inline(always)]
-    fn add_traj(traj: &Vec<(usize, usize)>,
+    fn add_traj(traj: &Vec<(u16, u16)>,
      self_board: &mut std::vec::Vec<std::vec::Vec<u16>>, j: &mut usize) {
        for (x, y) in traj {
-           self_board[*y][*x] += 1;
+           if *x == ISHTOP {break}
+           self_board[*y as usize][*x as usize] += 1;
        }
        *j += 1;
     }
 
-    for i in 0..cores {
+    for core in 0..cores {
         let board = Arc::clone(&board);
-        let mut rng = rng.clone();
-        // let mut rng = StdRng::from_entropy();
-        // let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(676);
-        
+
         // create some stuff per thread cuz the threads need their own stuff. children cant share stuff. smh spoiled kids
         let xmap = math::MapRange::new(xfrom, xto, 0.0, width as f64);
         let ymap = math::MapRange::new(yfrom, yto, 0.0, height as f64);
+        
+        let process = move || {
+            // dont clone rngs, results in same random no. generation
+            let randoff = Uniform::new(-2.0, 2.0);
+            // let mut rng = StdRng::from_entropy();
+            // let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(698776*core as u64); // seed should be differrent per thread
+            let mut rng = rand::thread_rng();
 
-        let mut process = move || {
             let mut indicator = ProgressIndicator::new(work_per_thread);
-            // let mut rng = rand::thread_rng();
             let mut j = 0;
             let mut self_board = vec![vec![0u16; width as usize]; height as usize];
+            let mut traj = vec![(0u16, 0u16); iterations];
+            let mut index: (i32, i32);
+
             while j < work_per_thread {
             
                 let mut z: (f64, f64); // convert into struct + try the use of '*' and stuff (idk how)
@@ -80,18 +84,16 @@ pub fn buddhabrot() {
                 let mut zx = cx;
                 let mut zy = cy;
                 
-                let mut traj: Vec<(usize, usize)> = Vec::with_capacity(iterations as usize);
-                let mut index: (i32, i32);
-
                 for i in 0..iterations {
                     index = (xmap.map(zx).round() as i32, ymap.map(zy).round() as i32);
                     if (index.0 > 0) && (index.1 > 0) && // if inside image, include it
                        (index.0 < width) && (index.1 < height) &&
                        (i >= ignore_first_n_iterations) {
-                        traj.push((index.0 as usize, index.1 as usize));
+                        traj[i] = (index.0 as u16, index.1 as u16);
                     }
                     if zx*zx+zy*zy > bailout_val_sq {
                         if anti || (i < min_iteration_threshold) {break}
+                        if i < iterations-1 {traj[i+1] = (ISHTOP, 0)}
                         add_traj(&traj, &mut self_board, &mut j);
                         break
                     }
@@ -100,7 +102,7 @@ pub fn buddhabrot() {
                     zy = z.1;
                 }
                 if anti {add_traj(&traj, &mut self_board, &mut j)}
-                if i == cores-1 {indicator.indicate(j)} // progress indicator
+                if core == cores-1 {indicator.indicate(j)} // progress indicator
             }
             let mut board = board.lock().unwrap();
             for y in 0..(height as usize) {
@@ -109,7 +111,7 @@ pub fn buddhabrot() {
                 }
             }
         };
-        if i == cores-1 { // running last one on main thread and rest on children threads
+        if core == cores-1 { // running last one on main thread and rest on children threads
             #[allow(unused_variables)]
             let work_per_thread = work_per_thread + leftover_work; // should be captured by the closure
             process();
@@ -124,16 +126,6 @@ pub fn buddhabrot() {
         worker.join().unwrap();
     }
     let board = board.lock().unwrap();
-
-    // let mut max = 0;
-    // let mut i: u16;
-    // for y in 0..(height as usize) {
-    //     for x in 0..(width as usize) {
-    //         i = board[y][x];
-    //         if i > max {max = i}
-    //     }
-    // }
-    // let colmap = math::MapRange::new(0.0, (max as f64)/60.0, 0.0, 255.0);
 
     let mut img = img::new_img(width as u32, height as u32);
     for y in 0..(height as usize) {
