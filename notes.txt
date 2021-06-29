@@ -25,7 +25,16 @@ rust stuff:
 rust buddhabrot:
   . make it easier to change parameters. i.e. bring the playable parameters at one place
   . figure out which rng is better for this
-  . try using complex nunmbers instead of zx, zy (will need to create those first)
+  . julia buddhabrots ?
+  . try using complex numbers instead of zx, zy (will need to create those first)
+  . 255*(hitcount/maxcount)^(1/gamma), now change gamma linearly
+  . early bailout if inside mandlebrot set
+  . do multiple color channels instead of just green
+    . different iteration ranges for different channels
+  . maybe add the ability to add more trajectories (from the infinidump func)
+  . randomly coloring the the BIG orbits (10^6 ~~ )
+  . cache the 'good' points
+  /. do time thing in infinidump
   . 
 
 rust mandlebrot:
@@ -33,6 +42,7 @@ rust mandlebrot:
   . shift x loop outside the threads, to see how slow it gets.
   . try threadpool and stuff (rayon ?)
     . the current methods already provides good performance for every core tho
+  . 
 
 findsol:
   . try to figure out how many digits are good. ie find the error in calculations

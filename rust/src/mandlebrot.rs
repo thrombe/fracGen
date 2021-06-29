@@ -3,8 +3,6 @@ use super::math;
 use super::img;
 use super::progress_indicator::ProgressIndicator;
 use std::f64::consts::{PI, FRAC_PI_2};
-use rand::SeedableRng;
-use rand::rngs::StdRng;
 use rand::distributions::{Uniform, Distribution};
 
 use std::thread;
@@ -44,10 +42,7 @@ pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel
     let bailout_val_sq: f64 = 4.0;
 
     // setting up some variables
-    let xmap = math::MapRange::new(0.0, width as f64, xfrom, xto);
-    let ymap = math::MapRange::new(0.0, height as f64, yfrom, yto);
     let sampf64 = samples as f64;
-    let rng = StdRng::from_entropy();
     let randoff = {
         let pix_half_width = (xto-xfrom)/(2.0*width as f64);
         Uniform::new(-pix_half_width, pix_half_width)
@@ -62,14 +57,15 @@ pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel
     for i in 0..cores {
         let img = Arc::clone(&img);
         let dovmap = dovmap.clone();
-        
-        // cloning some stuff cuz the threads need their own stuff. children cant share stuff. smh spoiled kids
-        let xmap = xmap.clone();
-        let ymap = ymap.clone();
-        let mut rng = rng.clone();
         let thread_y = i*work_per_thread;
+        
+        // cloning and creating some stuff cuz the threads need their own stuff. children cant share stuff. smh spoiled kids
+        let xmap = math::MapRange::new(0.0, width as f64, xfrom, xto);
+        let ymap = math::MapRange::new(0.0, height as f64, yfrom, yto);
 
-        let mut process = move || {
+        let process = move || {
+            let mut rng = rand::thread_rng();
+
             let mut indicator = ProgressIndicator::new(work_per_thread);
             let mut self_board = vec![vec![(0u8, 0u8, 0u8); width as usize]; work_per_thread as usize];
             for y in 0..work_per_thread {
