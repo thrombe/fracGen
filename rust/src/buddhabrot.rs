@@ -13,17 +13,18 @@ use std::thread; // for multi-threading
 use std::sync::{Mutex, Arc};
 
 pub fn buddhabrot() { // 3.5 for the good 5k image(10^5, 10^7), (1.5(its a tid bit dark), 10k)
-    let width: i32 = 10000;
-    let height: i32 = 10000;
+    let width: i32 = 3000;
+    let height: i32 = 3000;
     let cores: usize = 7;
-    let iterations: usize = 1000_000;
+    let iterations: usize = 10_000;
     let trajectories: usize = 1000_000; // should be linearly proportional to the generation time
     let bailout_val_sq: f64 = 4.0;
     let anti: bool = false; // if true, includes trajectories even if they lie in the mandlebrot set
     let ignore_first_n_iterations: usize = 0; // dont color first few points of every trajectory
-    let min_iteration_threshold: usize = 2; // dont accept the trajectory if it has less points (not for anti)
+    let min_iteration_threshold: usize = 5; // dont accept the trajectory if it has less points (not for anti)
     let (xfrom, xto, yfrom, yto) = math::xyrange(2.0, 0.0, 0.0);
-    let colmap = math::MapRange::new(0.0, (iterations as f64).log(2.0)*2.5, 0.0, 255.0);
+    let infini: bool = true;
+    let colmap = math::MapRange::new(0.0, (iterations as f64).log(2.0)*2.5, 0.0, 255.0); // only if infini is false
 
     #[inline(always)]
     fn eq(zx: f64, zy: f64, cx: f64, cy: f64) -> (f64, f64) {
@@ -34,7 +35,7 @@ pub fn buddhabrot() { // 3.5 for the good 5k image(10^5, 10^7), (1.5(its a tid b
         colmap.map(color as f64) as u8
         // (color%255) as u8
         // ((colmap.map(color as f64) as u16)%255) as u8
-        // 1/(1+e^-x) or something
+        // 255.0/(1.0+e^-color/scale) - 0.5 or something
     }
     
     // some stuff for multi-threading
@@ -127,6 +128,11 @@ pub fn buddhabrot() { // 3.5 for the good 5k image(10^5, 10^7), (1.5(its a tid b
     }
     let board = board.lock().unwrap();
 
+    if infini {
+        infini_dump(&board, height, width, iterations);
+        return
+    }
+
     let mut img = img::new_img(width as u32, height as u32);
     for y in 0..(height as usize) {
         for x in 0..(width as usize) {
@@ -134,4 +140,88 @@ pub fn buddhabrot() { // 3.5 for the good 5k image(10^5, 10^7), (1.5(its a tid b
         }
     }
     img::dump_img(img);
+}
+
+use std::time;
+// helps you analyse the board and create multiple images from the generated points.
+// mainly useful to change the brightness slightly/to figure out how what values to choose to get good images
+fn infini_dump(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width: i32, iterations: usize) {
+    let now = time::Instant::now();
+    
+    fn stat(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width: i32) {
+        let mut max = 0;
+        let mut average = 0.0;
+        // let mut mode = 0; // its gonna be very low. find a better average
+        let mut i: u16;
+        for y in 0..(height as usize) {
+            for x in 0..(width as usize) {
+                i = board[y][x];
+                if i > max {max = i}
+                average += i as f64;
+            }
+        }
+        average = average/((width*height) as f64);
+        println!("max = {} \naverage = {}\n", max, average)
+    }
+    
+    fn dump(board: &std::vec::Vec<std::vec::Vec<u16>>, colmap: &math::MapRange,
+    height: i32, width: i32, func: u32, iterations: usize) {
+        let mut img = img::new_img(width as u32, height as u32);
+        for y in 0..(height as usize) {
+            for x in 0..(width as usize) {
+                img::set_u8(&mut img, x as u32, y as u32, 0, submit_color(colmap, board[y][x], func, iterations), 0);
+            }
+        }
+        img::dump_img(img);
+        println!("image dumped \n")
+    }
+    
+    fn submit_color(colmap: &math::MapRange, color: u16, func: u32, iterations: usize) -> u8 {
+        match func {
+            1 => return colmap.map((color as f64).sqrt()) as u8,
+            2 => return colmap.map((color as f64).log(2.0)) as u8,
+            3 => return (255.0*((color as f64)/(iterations as f64)).sqrt()) as u8,
+            _ => return colmap.map(color as f64) as u8,
+        }
+    }
+    
+    loop {
+        println!("q -> quit \nstat -> prints stat \n2.5(number) -> the value from board that maps to 255 (chopped at end)\n");
+        let mut input = String::new();
+        std::io::stdin().read_line(&mut input).unwrap();
+        let input = &input[0..(input.len()-1)];
+        let max_color_value: f64;
+        // println!("{}",input);
+        match &input[..] {
+            "q" => {
+                println!("ui time - {:?}", now.elapsed());
+                return
+            }
+            "stat" => stat(board, height, width),
+            _ => {
+                match input.parse() {
+                    Ok(val) => max_color_value = val,
+                    Err(_) => {
+                        println!("input not understood");
+                        continue
+                    },
+                }
+                let colmap = math::MapRange::new(0.0, max_color_value, 0.0, 255.0); // linear map
+                
+                println!("choose from the following maps\n0(default if err) - colmap()\n1 - colmap(sqrt)\n2 - colmap(log)\n3 - sqrt(hit/limit)*255");
+                let mut input = String::new();
+                std::io::stdin().read_line(&mut input).unwrap();
+                let input = &input[0..(input.len()-1)];
+                let func: u32;
+                match input.parse() {
+                    Ok(val) => func = val,
+                    Err(_) => {
+                        println!("didnt get it");
+                        continue
+                    }
+                }
+                dump(board, &colmap, height, width, func, iterations);
+            },
+        }
+    }
 }

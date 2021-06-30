@@ -20,6 +20,7 @@ try:
 
 rust stuff:
   . use command line arguments for ease
+  . std::time::SystemTime::now()) - timestamp for filenames
   . 
 
 rust buddhabrot:
@@ -28,7 +29,11 @@ rust buddhabrot:
   . julia buddhabrots ?
   . try using complex numbers instead of zx, zy (will need to create those first)
   . 255*(hitcount/maxcount)^(1/gamma), now change gamma linearly
+  . histogram things in stat of infini-dump
   . early bailout if inside mandlebrot set
+    . this is very specific to the mandlebrot set. so make it togglable somehow
+    . cardiod -> ((x-0.25)²+y²+x/2)²-((x-0.25)²+y²)/4 < 0
+    . circle -> (x-1)²+y²-(1/4)² < 0
   . do multiple color channels instead of just green
     . different iteration ranges for different channels
   . maybe add the ability to add more trajectories (from the infinidump func)
@@ -38,7 +43,7 @@ rust buddhabrot:
   . 
 
 rust mandlebrot:
-  . use the rng that is used in buddhabrot
+  /. use the rng that is used in buddhabrot
   . shift x loop outside the threads, to see how slow it gets.
   . try threadpool and stuff (rayon ?)
     . the current methods already provides good performance for every core tho
