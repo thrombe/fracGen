@@ -30,16 +30,17 @@ rust buddhabrot:
   . try using complex numbers instead of zx, zy (will need to create those first)
   . 255*(hitcount/maxcount)^(1/gamma), now change gamma linearly
   . histogram things in stat of infini-dump
-  . early bailout if inside mandlebrot set
-    . this is very specific to the mandlebrot set. so make it togglable somehow
-    . cardiod -> ((x-0.25)²+y²+x/2)²-((x-0.25)²+y²)/4 < 0
-    . circle -> (x-1)²+y²-(1/4)² < 0
+  /. early bailout if inside mandlebrot set
+    /. this is very specific to the mandlebrot set. so make it togglable somehow
+    /. cardiod -> ((x-0.25)²+y²+x/2)²-((x-0.25)²+y²)/4 < 0
+    /. circle -> (x-1)²+y²-(1/4)² < 0
   . do multiple color channels instead of just green
     . different iteration ranges for different channels
   . maybe add the ability to add more trajectories (from the infinidump func)
   . randomly coloring the the BIG orbits (10^6 ~~ )
   . cache the 'good' points
   /. do time thing in infinidump
+    . do this better
   . 
 
 rust mandlebrot:

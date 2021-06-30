@@ -16,12 +16,13 @@ pub fn buddhabrot() { // 3.5 for the good 5k image(10^5, 10^7), (1.5(its a tid b
     let width: i32 = 3000;
     let height: i32 = 3000;
     let cores: usize = 7;
-    let iterations: usize = 10_000;
+    let iterations: usize = 100_000;
     let trajectories: usize = 1000_000; // should be linearly proportional to the generation time
+    let min_iteration_threshold: usize = 20; // dont accept the trajectory if it has less points (not for anti)
+    let ignore_first_n_iterations: usize = 15; // dont color first few points of every trajectory
     let bailout_val_sq: f64 = 4.0;
     let anti: bool = false; // if true, includes trajectories even if they lie in the mandlebrot set
-    let ignore_first_n_iterations: usize = 0; // dont color first few points of every trajectory
-    let min_iteration_threshold: usize = 5; // dont accept the trajectory if it has less points (not for anti)
+    let mut early_bailout: bool = true; // make this false if the equation is not for mandlebrot set (anti turns this off)
     let (xfrom, xto, yfrom, yto) = math::xyrange(2.0, 0.0, 0.0);
     let infini: bool = true;
     let colmap = math::MapRange::new(0.0, (iterations as f64).log(2.0)*2.5, 0.0, 255.0); // only if infini is false
@@ -46,6 +47,7 @@ pub fn buddhabrot() { // 3.5 for the good 5k image(10^5, 10^7), (1.5(its a tid b
     let mut worker_vec = vec![];
     
     const ISHTOP: u16 = !1;
+    if anti {early_bailout = false}
 
     #[inline(always)]
     fn add_traj(traj: &Vec<(u16, u16)>,
@@ -85,6 +87,11 @@ pub fn buddhabrot() { // 3.5 for the good 5k image(10^5, 10^7), (1.5(its a tid b
                 let mut zx = cx;
                 let mut zy = cy;
                 
+                if early_bailout && {
+                    let x = cx-0.25;
+                    let q = x*x+cy*cy;
+                    ((q+x/2.0)*(q+x/2.0)-q/4.0 < 0.0) || (q-0.0625 < 0.0)
+                } {continue}
                 for i in 0..iterations {
                     index = (xmap.map(zx).round() as i32, ymap.map(zy).round() as i32);
                     if (index.0 > 0) && (index.1 > 0) && // if inside image, include it
