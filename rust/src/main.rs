@@ -5,6 +5,7 @@ use std::time;
 mod img;
 mod mandlebrot;
 mod buddhabrot;
+mod buddhabrot_dumper;
 mod math;
 mod vec4d;
 mod progress_indicator;
