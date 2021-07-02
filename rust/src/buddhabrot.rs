@@ -16,7 +16,7 @@ use std::sync::{Mutex, Arc};
 pub fn buddhabrot() { // 3.5 for the good 5k image(10^5, 10^7), (1.5(its a tid bit dark), 10k)
     let width: i32 = 3000;
     let height: i32 = 3000;
-    let cores: usize = 7;
+    let cores: usize = 4;
     let iterations: usize = 100_000;
     let trajectories: usize = 100_000; // should be linearly proportional to the generation time
     let min_iteration_threshold: usize = 20; // dont accept the trajectory if it has less points (not for anti)
@@ -173,14 +173,15 @@ fn infini_dump(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width: i3
     }
     
     fn dump(board: &std::vec::Vec<std::vec::Vec<u16>>, colmap: &math::MapRange,
-    cholors: u8, height: i32, width: i32, func: u32, iterations: usize) {
+    color_swap: u8, height: i32, width: i32, func: u32, color_method: u8) {
         let mut img = img::new_img(width as u32, height as u32);
         for y in 0..(height as usize) {
             for x in 0..(width as usize) {
+                let color = submit_color(colmap, board[y][x], func, color_swap, color_method);
                 img::set_u8(&mut img, x as u32, y as u32,
-                    submit_color(colmap, board[y][x], func, iterations, 0, cholors), // dont call thrice if want some optimisations here
-                    submit_color(colmap, board[y][x], func, iterations, 1, cholors),
-                    submit_color(colmap, board[y][x], func, iterations, 2, cholors),
+                    color.x as u8,
+                    color.y as u8,
+                    color.z as u8,
                 );
             }
         }
@@ -188,45 +189,66 @@ fn infini_dump(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width: i3
         println!("image dumped \n")
     }
     
-    fn submit_color(colmap: &math::MapRange, color: u16, func: u32, iterations: usize, mut rgb: u8, cholors: u8) -> u8 {
-        match cholors {
-            1 => if rgb == 1 {rgb = 2} else if rgb == 2 {rgb = 1} else if rgb == 2 {rgb = 2}, // r b g
-            2 => if rgb == 1 {rgb = 0} else if rgb == 2 {rgb = 1} else if rgb == 0 {rgb = 2}, // g b r
-            3 => if rgb == 2 {rgb = 0} else if rgb == 0 {rgb = 1} else if rgb == 1 {rgb = 2}, // b r g
-            _ => (), // r g b
-        }
+    fn submit_color(colmap: &math::MapRange, color: u16, func: u32, color_swap: u8, color_method: u8) -> Vec4d {
         let clor: f64;
-        match func {
+        match func { // applying the funcs to the hit value
             1 => clor = colmap.map((color as f64).sqrt()),
             2 => clor = colmap.map((color as f64).log(2.0)),
-            3 => clor = 255.0*((color as f64)/(iterations as f64)).sqrt(), // dosent really work, like ever (this needs big values of min_iteration_threshold)
             _ => clor = colmap.map(color as f64),
         }
-        match rgb { // matching for mapping rgb one after the other
-            0 => return clor as u8,
-            1 => if clor > 255.0 {return (clor - 255.0) as u8} else {return 0}
-            2 => if clor > 511.0 {return (clor - 511.0) as u8} else {return 0}
-            _ => panic!(),
+
+        let mut clor_vec = Vec4d::new(0.0, 0.0, 0.0, 0.0);
+
+        if color_method == 0 { // overflow version
+            clor_vec.x = clor;
+            if clor > 255.0 {clor_vec.y = clor - 255.0} else {clor_vec.y = 0.0}
+            if clor > 511.0 {clor_vec.z = clor - 511.0} else {clor_vec.z = 0.0}
         }
-        // match rgb { // the mod version
-        //     0 => return ((clor as u32 + 15)%255) as u8,
-        //     1 => return (((clor as u32 + 34)%511)/2) as u8,
-        //     2 => return (((clor as u32 + 45)%1023)/4) as u8,
-        //     _ => panic!(),
-        // }
+        if color_method == 1 { // mod version
+            clor_vec.x = ((clor as u32 + 15)%255) as f64;
+            clor_vec.y = (((clor as u32 + 34)%511)/2) as f64;
+            clor_vec.z = (((clor as u32 + 45)%1023)/4) as f64;
+        }
+        if color_method == 2 { // lerp version
+            let color_vecs = [
+                Vec4d::new(0.0, 0.0, 0.0, 0.0),
+                Vec4d::new(200.0, 0.0, 200.0, 0.0), // better visible in linear (1)
+                Vec4d::new(180.0, 30.0, 190.0, 0.0),
+                Vec4d::new(140.0, 80.0, 190.0, 0.0), // sqrt - (3)
+                Vec4d::new(80.0, 160.0, 255.0, 0.0), // log - (4)
+                Vec4d::new(20.0, 235.0, 255.0, 0.0),
+            ];
+            let mut t: f64 = clor/255.0;
+            let intervals = color_vecs.len()-1;
+            t = t*intervals as f64;
+            let mut index = t.floor() as usize; // gif
+            if index < 1 {index = 1}
+            if index > intervals {index = intervals}
+            clor_vec = color_vecs[index].lerp(color_vecs[index-1], t.floor()); // lerping
+            // if (y < 1550) && (y > 1450) && (x == y) {println!("{}--{:?}", t, color)}
+        }
+
+        match color_swap { // swapping the color channels
+            1 => Vec4d::new(clor_vec.x, clor_vec.z, clor_vec.y, 0.0), // r b g
+            2 => Vec4d::new(clor_vec.y, clor_vec.z, clor_vec.x, 0.0), // g b r
+            3 => Vec4d::new(clor_vec.z, clor_vec.x, clor_vec.y, 0.0), // b r g
+            _ => clor_vec, // r g b
+        }
     }
     
-    let help_text = "help -> this message\ndump | d -> dump image\nq -> quit\nstat -> prints stat\ncolmap -> select from a few pre-defined maps\ncholors - choose colors of the fractal\nmincol - set the minimum color value in colmap\n2.5(number) -> the value from board that maps to 255 (chopped at end)";
+    let help_text = "help -> this message\ndump | d -> dump image\nq -> quit\nstat -> prints stat\ncolor_method - choose coloring method\ncolmap -> select from a few pre-defined maps\ncolor_swap - choose colors of the fractal\nmincol - set the minimum color value in colmap\n2.5(number) -> the value from board that maps to 255 (chopped at end)";
     let bad_input = "input not understood";
-    let colmap_options = "choose from the following maps\n0(default if err) - colmap()\n1 - colmap(sqrt)\n2 - colmap(log)\n3 - sqrt(hit/limit)*255";
+    let colmap_options = "choose from the following maps\n0(default if err) - colmap()\n1 - colmap(sqrt)\n2 - colmap(log)";
     let cholor_options = "0(default) - rgb\n1 - rbg\n2 - gbr\n3 - brg";
+    let color_method_options = "0 - overflow\n1 - mod\n2 - lerp";
 
     let mut input_str: String = String::new();
     let mut colmap: math::MapRange = math::MapRange::new(0.0, (iterations as f64).log(2.0)*2.5, 0.0, 255.0);
     let mut selected_colmap: u32 = 0;
-    let mut cholors: u8 = 0;
+    let mut color_swap: u8 = 0;
     let mut min_color_value: f64 = 0.0;
     let mut max_color_value: f64 = (iterations as f64).log(2.0)*2.5;
+    let mut color_method: u8 = 0;
     
     println!("{}\n", help_text);
     loop {
@@ -237,7 +259,7 @@ fn infini_dump(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width: i3
                 return
             }
             "stat" => stat(board, height, width),
-            "dump" | "d" => dump(board, &colmap, cholors, height, width, selected_colmap, iterations),
+            "dump" | "d" => dump(board, &colmap, color_swap, height, width, selected_colmap, color_method),
             "colmap" => {
                 println!("{}", colmap_options);
                 match input(&mut input_str).parse() {
@@ -249,10 +271,22 @@ fn infini_dump(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width: i3
                 }
                 println!("");
             },
-            "cholors" => {
+            "color_method" => {
+                println!("{}", color_method_options);
+                match input(&mut input_str).parse() {
+                    Ok(val) => color_method = val,
+                    Err(_) => {
+                        println!("{}", bad_input);
+                        continue
+                    }
+                }
+                if color_method == 2 {color_swap = 0}
+                println!("");  
+            },
+            "color_swap" => {
                 println!("{}", cholor_options);
                 match input(&mut input_str).parse() {
-                    Ok(val) => cholors = val,
+                    Ok(val) => color_swap = val,
                     Err(_) => {
                         println!("{}", bad_input);
                         continue
