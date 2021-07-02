@@ -2,7 +2,7 @@
 use image::{ImageBuffer, RgbImage};
 use std::path::Path;
 
-// an example of how a simple image generation looks like
+/// an example of how a simple image generation looks like
 pub fn example_img() {
     let width: u32 = 255;
     let height: u32 = 255;
@@ -21,7 +21,7 @@ pub fn new_img(width: u32, height: u32) -> ImageBuffer<image::Rgb<u8>, std::vec:
     image
 }
 
-// finds what file name is valid
+/// finds what file name is valid
 fn file_name() -> String {
     let mut i = 0;
     let mut path: String;
@@ -32,7 +32,7 @@ fn file_name() -> String {
     }
 }
 
-// dumps image with a valid filename
+/// dumps image with a valid filename
 pub fn dump_img(img: ImageBuffer<image::Rgb<u8>, std::vec::Vec<u8>>) {
     img.save(file_name()).unwrap();
 }
@@ -41,13 +41,13 @@ pub fn dump_img_mut(img: &mut ImageBuffer<image::Rgb<u8>, std::vec::Vec<u8>>) {
     img.save(file_name()).unwrap();
 }
 
-// set pixels of image
+/// set pixels of image
 #[inline(always)]
 pub fn set(img: &mut ImageBuffer<image::Rgb<u8>, std::vec::Vec<u8>>, x: u32, y: u32, r: f64, g: f64, b: f64) {
     img.put_pixel(x, y, image::Rgb([r as u8, g as u8, b as u8]))
 }
 
-// set pixels of image
+/// set pixels of image
 #[inline(always)]
 pub fn set_u8(img: &mut ImageBuffer<image::Rgb<u8>, std::vec::Vec<u8>>, x: u32, y: u32, r: u8, g: u8, b: u8) {
     img.put_pixel(x, y, image::Rgb([r, g, b]))
@@ -65,7 +65,7 @@ pub struct pix {
 impl pix {
 
     #[inline(always)]
-    pub fn pixel_create(x: u32, y: u32, r: f64, g: f64, b: f64) -> pix {
+    pub fn new(x: u32, y: u32, r: f64, g: f64, b: f64) -> pix {
         pix {
             x,
             y,

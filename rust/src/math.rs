@@ -11,7 +11,7 @@ pub struct MapRange {
     foff: f64,
 }
 impl MapRange {
-    // gives a struct. use struct.map(num) to map num
+    /// gives a struct. use struct.map(num) to map num
     pub fn new(fs: f64, fe: f64, ts: f64, te: f64) -> MapRange {
         MapRange {
             scale: ((te-ts)/(fe-fs)),

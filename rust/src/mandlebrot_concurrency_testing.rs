@@ -211,7 +211,7 @@ pub fn mandle_conc_cross() {
                                 }
                             }
                         }        
-                        outchan.send(img::pix::pixel_create(x, y, r/sampf64, g/sampf64, b/sampf64)).unwrap();
+                        outchan.send(img::pix::new(x, y, r/sampf64, g/sampf64, b/sampf64)).unwrap();
                     }
                 }
         });
@@ -295,7 +295,7 @@ pub fn mandle_conc_mutex() {
                             }
                         }
                     }        
-                    outchan.send(img::pix::pixel_create(x, y, r/sampf64, g/sampf64, b/sampf64)).unwrap();
+                    outchan.send(img::pix::new(x, y, r/sampf64, g/sampf64, b/sampf64)).unwrap();
                 }
             }
         });
@@ -383,8 +383,8 @@ pub fn mandle_conc_mutex2() { // with works as mutable atomic (or something) vec
                             }
                         }
                     }
-                    // out.lock().unwrap().push(img::pix::pixel_create(x, y, r/sampf64, g/sampf64, b/sampf64));
-                    outchan.send(img::pix::pixel_create(x, y, r/sampf64, g/sampf64, b/sampf64)).unwrap();
+                    // out.lock().unwrap().push(img::pix::new(x, y, r/sampf64, g/sampf64, b/sampf64));
+                    outchan.send(img::pix::new(x, y, r/sampf64, g/sampf64, b/sampf64)).unwrap();
                 }
             }
         });
@@ -466,7 +466,7 @@ pub fn mandle_conc_mutex3() { // with both out and works as mutable atomic (or s
                         }
                     }
                 }
-                out2.lock().unwrap().push(img::pix::pixel_create(x, y, r/sampf64, g/sampf64, b/sampf64));
+                out2.lock().unwrap().push(img::pix::new(x, y, r/sampf64, g/sampf64, b/sampf64));
             }
         }
     };
@@ -563,7 +563,7 @@ pub fn mandle_conc_mutex4() { // similar to version 5 but no refactoring
                         }
                     }
                 }
-                outchan2.send(img::pix::pixel_create(x, y, r/sampf64, g/sampf64, b/sampf64)).unwrap();
+                outchan2.send(img::pix::new(x, y, r/sampf64, g/sampf64, b/sampf64)).unwrap();
             }
         }
         drop(outchan2);
@@ -663,7 +663,7 @@ pub fn mandle_conc_mutex5() { // output work in a image sized channel (crossbeam
                             }
                         }
                     }
-                    outchan.send(img::pix::pixel_create(x, y, r/sampf64, g/sampf64, b/sampf64)).unwrap();
+                    outchan.send(img::pix::new(x, y, r/sampf64, g/sampf64, b/sampf64)).unwrap();
                 }
             }
         };

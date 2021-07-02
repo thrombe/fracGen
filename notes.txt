@@ -28,7 +28,8 @@ rust buddhabrot:
   . figure out which rng is better for this
   . julia buddhabrots ?
   . try using complex numbers instead of zx, zy (will need to create those first)
-  . 255*(hitcount/maxcount)^(1/gamma), now change gamma linearly
+  \. 255*(hitcount/maxcount)^(1/gamma), now change gamma linearly
+    . super dark for what i can do in reasonable time (needs comparatively high hits)
   . histogram things in stat of infini-dump
   /. early bailout if inside mandlebrot set
     /. this is very specific to the mandlebrot set. so make it togglable somehow
@@ -36,6 +37,19 @@ rust buddhabrot:
     /. circle -> (x-1)²+y²-(1/4)² < 0
   . do multiple color channels instead of just green
     . different iteration ranges for different channels
+  . multiple color mapping from infinidump
+    . linearly map colors from r, rg, rgb (0, 3*255)
+      /. after colmap+func
+        . its rare to see the upper colors (very high hit points are clumped together (unless high trajectory (maybe)))
+        . no signs of the third color (goes from r to white pretty quickly)
+        . if func is not linear, then the upper colors are bad 
+      . before colmap+func
+        . ? (havent tried)
+    . lerp between n colors from 0 to iterations
+      . first color can be black, so that background is black
+      . dark colors towards 0 and bright ones towards iteraations
+    . histogram thing?
+    . hsv or some color map (like those in the mandlebrot app)
   . maybe add the ability to add more trajectories (from the infinidump func)
   . randomly coloring the the BIG orbits (10^6 ~~ )
   . cache the 'good' points
@@ -48,6 +62,7 @@ rust mandlebrot:
   . shift x loop outside the threads, to see how slow it gets.
   . try threadpool and stuff (rayon ?)
     . the current methods already provides good performance for every core tho
+  . read and implement better color methods from the pdf i found
   . 
 
 findsol:

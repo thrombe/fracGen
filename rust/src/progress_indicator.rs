@@ -8,7 +8,7 @@ pub struct ProgressIndicator {
 }
 
 impl ProgressIndicator {
-    // total is the total amount of work done by the worker
+    /// total is the total amount of work done by the worker
     pub fn new(total: usize) -> ProgressIndicator {
         ProgressIndicator {
             oneperc: total/100,
@@ -17,7 +17,7 @@ impl ProgressIndicator {
         }
     }
 
-    // prog is the current work done by the worker, should end at total
+    /// prog is the current work done by the worker, should end at total
     #[inline(always)]
     pub fn indicate(&mut self, mut prog: usize) {
         if self.ended {return}
