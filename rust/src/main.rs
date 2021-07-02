@@ -6,6 +6,7 @@ mod img;
 mod mandlebrot;
 mod buddhabrot;
 mod math;
+mod vec4d;
 mod progress_indicator;
 
 mod mandlebrot_concurrency_testing;
