@@ -24,10 +24,11 @@ struct Options {
 pub fn infini_dump(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width: i32, iterations: usize) {
     let now = time::Instant::now();
     
-    let help_text = "help -> this message\ndump | d -> dump image\nq -> quit\nstat -> prints stat\ncolor_method - choose coloring method\ncolmap -> select from a few pre-defined maps\ncolor_swap - choose colors of the fractal\nmincol - set the minimum color value in colmap\n2.5(number) -> the value from board that maps to 255 (chopped at end)";
+    let help_text = "help -> this message\ndump | d -> dump image\nq -> quit\nstat -> prints stat\ncolor_method - choose coloring method\ncolor_vecs - choose colors to lerp between in color_method == 2\ncolmap -> select from a few pre-defined maps\ncolor_swap - choose colors of the fractal\nmincol - set the minimum color value in colmap\n2.5(number) -> the value from board that maps to 255 (chopped at end)";
+    // let help_text = "help\ndump | d\nq\nstat\ncolor_method\ncolor_vecs\ncolmap\ncolor_swap\nmincol\n2.5(number)";
     let bad_input = "input not understood";
     let colmap_options = "choose from the following maps\n0(default if err) - colmap()\n1 - colmap(sqrt)\n2 - colmap(log)";
-    let cholor_options = "0(default) - rgb\n1 - rbg\n2 - gbr\n3 - brg";
+    let color_swap_options = "0(default) - rgb\n1 - rbg\n2 - gbr\n3 - brg";
     let color_method_options = "0 - overflow\n1 - mod\n2 - lerp";
 
     let mut op = Options {
@@ -42,7 +43,7 @@ pub fn infini_dump(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width
         max_color_value: (iterations as f64).log(2.0)*2.5,
         color_method: 0,
         color_method_mod_off: Vec4d::new(15.0, 48.0, 63.0, 0.0),
-        color_vecs: vec![
+        color_vecs: vec![ // keeping similar colors helps (starting vectors end quick. so keep more of those)
             Vec4d::new(0.0, 0.0, 0.0, 0.0),
             Vec4d::new(200.0, 0.0, 200.0, 0.0), // better visible in linear (1)
             Vec4d::new(180.0, 30.0, 190.0, 0.0),
@@ -62,61 +63,39 @@ pub fn infini_dump(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width
             }
             "stat" => stat(board, &op),
             "dump" | "d" => dump(board, &op),
-            "colmap" => {
-                println!("{}", colmap_options);
-                match input(&mut op.input_str).parse() {
-                    Ok(val) => op.selected_colmap = val,
-                    Err(_) => {
-                        println!("{}", bad_input);
-                        continue
-                    }
-                }
-                println!("");
-            },
+            "colmap" => input_and_set(&mut op.input_str, &mut op.selected_colmap, colmap_options, bad_input),
             "color_method" => {
-                println!("{}", color_method_options);
-                match input(&mut op.input_str).parse() {
-                    Ok(val) => op.color_method = val,
-                    Err(_) => {
-                        println!("{}", bad_input);
-                        continue
-                    }
-                }
+                input_and_set(&mut op.input_str, &mut op.color_method, color_method_options, bad_input);
                 if op.color_method == 2 {op.color_swap = 0}
-                println!("");  
             },
-            "color_swap" => {
-                println!("{}", cholor_options);
-                match input(&mut op.input_str).parse() {
-                    Ok(val) => op.color_swap = val,
-                    Err(_) => {
-                        println!("{}", bad_input);
-                        continue
-                    }
-                }
-                println!("");
-            },
+            "color_swap" => input_and_set(&mut op.input_str, &mut op.color_swap, color_swap_options, bad_input),
             "mincol" => {
-                match input(&mut op.input_str).parse() {
-                    Ok(val) => op.min_color_value = val,
-                    Err(_) => {
-                        println!("{}\n", bad_input);
-                        continue
-                    },
-                }
-                println!("");
+                input_and_set(&mut op.input_str, &mut op.min_color_value, "", bad_input);
                 op.colmap = math::MapRange::new(op.min_color_value, op.max_color_value, 0.0, 255.0); // linear map
             },
             "color_vecs" => {
-                
+                println!("input 3n rgb values seperated by spaces (no. of spaces dosent matter)");
+                let inp = input(&mut op.input_str);
+                let num_str_iter = inp.split_whitespace();
+                let mut nums = vec!();
+                for num_str in num_str_iter {
+                    match num_str.parse::<f64>() {
+                        Ok(val) => nums.append(&mut vec!(val)),
+                        Err(_) => println!("could'nt decipher"),
+                    }
+                }
+                if nums.len()%3 != 0 {println!("not good no. of inputs")}
+                op.color_vecs = vec![];
+                for i in 0..(nums.len()/3) {
+                    op.color_vecs.append(&mut vec!(Vec4d::new(nums[i*3], nums[i*3+1], nums[i*3+2], 0.0)));
+                }
+                // println!("{:?}", op.color_vecs);
+                println!("");
             },
             _ => {
                 match op.input_str[0..(op.input_str.len()-1)].parse() {
                     Ok(val) => op.max_color_value = val,
-                    Err(_) => {
-                        println!("{}\n", bad_input);
-                        continue
-                    },
+                    Err(_) => {println!("{}\n", bad_input)},
                 }
                 println!("");
                 op.colmap = math::MapRange::new(op.min_color_value, op.max_color_value, 0.0, 255.0); // linear map
@@ -180,12 +159,23 @@ fn stat(board: &std::vec::Vec<std::vec::Vec<u16>>, op: &Options) {
     println!("max = {} \naverage = {}\n", max, average)
 }
 
+/// print option help string, take input and set value to var
+fn input_and_set<T: std::str::FromStr>(input_str: &mut String, var: &mut T, option_help_str: &str, bad_input: &str) {
+    println!("{}", option_help_str);
+    match input(input_str).parse::<T>() {
+        Ok(val) => *var = val,
+        Err(_) => {println!("{}\n", bad_input)},
+    }
+    println!("");
+}
+
 fn input(input_str: &mut String) -> &str {
     input_str.clear();
     std::io::stdin().read_line(input_str).unwrap();
     &input_str[0..(input_str.len()-1)]
 }
 
+/// apply submit_color to each value in board and dump an image
 fn dump(board: &std::vec::Vec<std::vec::Vec<u16>>, op: &Options) {
     let mut img = img::new_img(op.width as u32, op.height as u32);
     for y in 0..(op.height as usize) {
