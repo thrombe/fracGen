@@ -66,12 +66,6 @@ impl pix {
 
     #[inline(always)]
     pub fn new(x: u32, y: u32, r: f64, g: f64, b: f64) -> pix {
-        pix {
-            x,
-            y,
-            r,
-            g,
-            b,
-        }
+        pix { x, y, r, g, b}
     }
 }

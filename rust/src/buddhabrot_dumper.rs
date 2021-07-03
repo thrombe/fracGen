@@ -30,6 +30,8 @@ pub fn infini_dump(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width
     let colmap_options = "choose from the following maps\n0(default if err) - colmap()\n1 - colmap(sqrt)\n2 - colmap(log)";
     let color_swap_options = "0(default) - rgb\n1 - rbg\n2 - gbr\n3 - brg";
     let color_method_options = "0 - overflow\n1 - mod\n2 - lerp";
+    let color_vecs_help = "input 3n rgb values seperated by spaces (no. of spaces dosent matter)";
+    let mod_offset_help = "enter 3 offsets seperated by spaces (g and b offsets are scaled down by 2 and 4 resp.)";
 
     let mut op = Options {
         height: height,
@@ -73,15 +75,33 @@ pub fn infini_dump(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width
                 input_and_set(&mut op.input_str, &mut op.min_color_value, "", bad_input);
                 op.colmap = math::MapRange::new(op.min_color_value, op.max_color_value, 0.0, 255.0); // linear map
             },
+            "mod_offset" => {
+                println!("{}", mod_offset_help);
+                let inp = input(&mut op.input_str);
+                let num_str_iter: Vec<&str> = inp.split_whitespace().collect();
+                match num_str_iter[0].parse::<f64>() {
+                    Ok(val) => op.color_method_mod_off.x = val,
+                    Err(_) => println!("{}", bad_input),
+                }
+                match num_str_iter[1].parse::<f64>() {
+                    Ok(val) => op.color_method_mod_off.y = val,
+                    Err(_) => println!("{}", bad_input),
+                }
+                match num_str_iter[2].parse::<f64>() {
+                    Ok(val) => op.color_method_mod_off.z = val,
+                    Err(_) => println!("{}", bad_input),
+                }
+                println!("");
+            }
             "color_vecs" => {
-                println!("input 3n rgb values seperated by spaces (no. of spaces dosent matter)");
+                println!("{}", color_vecs_help);
                 let inp = input(&mut op.input_str);
                 let num_str_iter = inp.split_whitespace();
                 let mut nums = vec!();
                 for num_str in num_str_iter {
                     match num_str.parse::<f64>() {
                         Ok(val) => nums.append(&mut vec!(val)),
-                        Err(_) => println!("could'nt decipher"),
+                        Err(_) => println!("{}", bad_input),
                     }
                 }
                 if nums.len()%3 != 0 {println!("not good no. of inputs")}
@@ -104,12 +124,12 @@ pub fn infini_dump(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width
     }
 }
 
-fn submit_color(color: u16, op: &Options) -> Vec4d {
+fn submit_color(hits: u16, op: &Options) -> Vec4d {
     let clor: f64;
     match op.selected_colmap { // applying the funcs to the hit value
-        1 => clor = op.colmap.map((color as f64).sqrt()),
-        2 => clor = op.colmap.map((color as f64).log(2.0)),
-        _ => clor = op.colmap.map(color as f64),
+        1 => clor = op.colmap.map((hits as f64).sqrt()),
+        2 => clor = op.colmap.map((hits as f64).log(2.0)),
+        _ => clor = op.colmap.map(hits as f64),
     }
 
     let mut clor_vec = Vec4d::new(0.0, 0.0, 0.0, 0.0);

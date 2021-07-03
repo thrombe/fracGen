@@ -24,12 +24,18 @@ rust stuff:
   . 
 
 rust buddhabrot:
+  . tips for nicer images
+    . increase the min_color or something (infinidump) to 15 to remove the background noise (if present)
+    . keep similar colors in the lerp coloring method
+    . keep more versions of same color and build it up slowly instead of jumping from 0 to 255
+    . see what colors you enter before entering (helps a lot)
+    . 
   . make it easier to change parameters. i.e. bring the playable parameters at one place
   . figure out which rng is better for this
   . julia buddhabrots ?
   . try using complex numbers instead of zx, zy (will need to create those first)
   \. 255*(hitcount/maxcount)^(1/gamma), now change gamma linearly
-    . super dark for what i can do in reasonable time (needs comparatively high hits)
+    \. super dark for what i can do in reasonable time (needs comparatively high hits)
   . histogram things in stat of infini-dump
   /. early bailout if inside mandlebrot set
     /. this is very specific to the mandlebrot set. so make it togglable somehow
@@ -38,18 +44,9 @@ rust buddhabrot:
   . do multiple color channels instead of just green
     . different iteration ranges for different channels
   . multiple color mapping from infinidump
-    . linearly map colors from r, rg, rgb (0, 3*255)
-      /. after colmap+func
-        . its rare to see the upper colors (very high hit points are clumped together (unless high trajectory (maybe)))
-        . no signs of the third color (goes from r to white pretty quickly)
-        . if func is not linear, then the upper colors are bad 
-      . before colmap+func
-        . ? (havent tried)
-    . lerp between n colors from 0 to iterations
-      . first color can be black, so that background is black
-      . dark colors towards 0 and bright ones towards iteraations
     . histogram thing?
-    . hsv or some color map (like those in the mandlebrot app)
+    . some color map (like those in the mandlebrot app)
+      \. this is kinda similar to the lerp method. just that every color change is linear
   . maybe add the ability to add more trajectories (from the infinidump func)
   . randomly coloring the the BIG orbits (10^6 ~~ )
   . cache the 'good' points
@@ -58,7 +55,6 @@ rust buddhabrot:
   . 
 
 rust mandlebrot:
-  /. use the rng that is used in buddhabrot
   . shift x loop outside the threads, to see how slow it gets.
   . try threadpool and stuff (rayon ?)
     . the current methods already provides good performance for every core tho
