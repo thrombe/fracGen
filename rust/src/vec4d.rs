@@ -14,15 +14,17 @@ impl Vec4d {
         Self {x, y, z, w}
     }
 
+    /// lerp, but chopped at t = 0 and t = 1
     #[inline(always)]
-    pub fn lerp(&self, other: Self, t: f64) -> Self {
+    pub fn lerp_with_chop(&self, other: Self, t: f64) -> Self {
         if t > 1.0 {return *self}
         if t < 0.0 {return other}
         *self*t + other*(1.0-t)
     }
 
+    /// returns self*t + other*(1-t)
     #[inline(always)]
-    pub fn lerp_without_check(&self, other: Self, t: f64) -> Self {
+    pub fn lerp(&self, other: Self, t: f64) -> Self {
         *self*t + other*(1.0-t)
     }
 
@@ -41,13 +43,20 @@ impl Vec4d {
         *self * (1.0/self.size())
     }
 
-    pub fn cross(self, other: Vec4d) -> Vec4d {
+    /// returns a new vector which is the 3d cross product of the 2, self at left, w component is also of self (other.w is ignored)
+    #[inline(always)]
+    pub fn cross3d(&self, other: Self) -> Self {
         Vec4d {
             x: self.y*other.z - other.y*self.z,
             y: self.x*other.z - other.x*self.z,
             z: self.x*other.y - other.x*self.y,
             w: self.w,
         }
+    }
+
+    #[inline(always)]
+    pub fn dot(&self, other: Self) -> f64 {
+        *self * other
     }
 }
 
@@ -78,6 +87,8 @@ impl Sub for Vec4d {
         }
     }
 }
+
+// this isnt cross cuz cross is a 3d func, not 4d. so vec1*vec2 -> f64 makes more sense
 impl Mul for Vec4d {
     type Output = f64;
 
@@ -86,21 +97,6 @@ impl Mul for Vec4d {
         self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
     }
 }
-
-// /// 3d vector multiplication
-// impl Mul<Vec4d> for &Vec4d { // this is ugly
-//     type Output = Vec4d;
-
-//     /// ugly implementation of 3d vector multiplication
-//     fn mul(self, other: Vec4d) -> Vec4d {
-//         Vec4d {
-//             x: self.y*other.z - other.y*self.z,
-//             y: self.x*other.z - other.x*self.z,
-//             z: self.x*other.y - other.x*self.y,
-//             w: self.w,
-//         }
-//     }
-// }
 
 impl Mul<f64> for Vec4d {
     type Output = Self;

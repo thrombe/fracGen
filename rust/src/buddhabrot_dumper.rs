@@ -151,7 +151,7 @@ fn submit_color(hits: u16, op: &Options) -> Vec4d {
         let mut index = t.floor() as usize; // gif
         if index < 1 {index = 1}
         if index > intervals {index = intervals}
-        clor_vec = op.color_vecs[index].lerp(op.color_vecs[index-1], t.floor()); // lerping
+        clor_vec = op.color_vecs[index].lerp_with_chop(op.color_vecs[index-1], t.floor()); // lerping
         // if (y < 1550) && (y > 1450) && (x == y) {println!("{}--{:?}", t, color)}
     }
 
