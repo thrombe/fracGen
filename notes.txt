@@ -20,7 +20,12 @@ try:
 
 rust stuff:
   . use command line arguments for ease
-  . std::time::SystemTime::now()) - timestamp for filenames
+  . std::time::SystemTime::now() - timestamp for filenames
+  . custom complex numbers can be enums with 2 different possible 
+    representations, one with (real, imag), and other with (r, theta)
+    . maybe (r^2, theta) ?. this saves a sqrt
+    . maybe prefer (r, theta) instead of (real, imag) cuz calc are easier? idk needs more thought
+    . 
   . 
 
 rust buddhabrot:
@@ -31,6 +36,8 @@ rust buddhabrot:
     . see what colors you enter before entering (helps a lot)
     . 
   . make it easier to change parameters. i.e. bring the playable parameters at one place
+  . try using the unsafe get_unchecked_mut pointer or something (for array/vec)
+    . check how much performance difference (i saw it in multiple implementations)
   . figure out which rng is better for this
   . julia buddhabrots ?
   . try using complex numbers instead of zx, zy (will need to create those first)

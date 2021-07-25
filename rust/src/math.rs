@@ -45,3 +45,12 @@ impl ChopRange {
         if num < self.start {self.start} else if num > self.end {self.end} else {num}
     }
 }
+
+/// outputs a f64 in range [0, m) if m > 0, and (m, 0] if m < 0
+/// the m > 0 case is chosen cuz of the remainder like behaviour
+/// and m < 0 case is just the extension of the above case as i couldnt find any info on how it should be
+/// note: (maybe) different difinitions could have been chosen for this
+///       for eg, instead of floor(), we could round it to an integer closer to 0, etc
+pub fn fmod(f: f64, m: f64) -> f64 {
+    f-(f/m).floor()*m
+}
