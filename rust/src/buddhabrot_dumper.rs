@@ -24,10 +24,24 @@ struct Options {
 pub fn infini_dump(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width: i32, iterations: usize) {
     let now = time::Instant::now();
     
-    let help_text = "help -> this message\ndump | d -> dump image\nq -> quit\nstat -> prints stat\ncolor_method - choose coloring method\ncolor_vecs - choose colors to lerp between in color_method == 2\ncolmap -> select from a few pre-defined maps\ncolor_swap - choose colors of the fractal\nmincol - set the minimum color value in colmap\n2.5(number) -> the value from board that maps to 255 (chopped at end)";
+    let help_text = 
+"help -> this message
+dump | d -> dump image
+q -> quit
+stat -> prints stat
+color_method - choose coloring method
+color_vecs - choose colors to lerp between in color_method == 2
+colmap -> select from a few pre-defined maps
+color_swap - choose colors of the fractal
+mincol - set the minimum color value in colmap
+2.5(number) -> the value from board that maps to 255 (chopped at end)";
     // let help_text = "help\ndump | d\nq\nstat\ncolor_method\ncolor_vecs\ncolmap\ncolor_swap\nmincol\n2.5(number)";
     let bad_input = "input not understood";
-    let colmap_options = "choose from the following maps\n0(default if err) - colmap()\n1 - colmap(sqrt)\n2 - colmap(log)";
+    let colmap_options = 
+"choose from the following maps
+0(default if err) - colmap()
+1 - colmap(sqrt)
+2 - colmap(log)";
     let color_swap_options = "0(default) - rgb\n1 - rbg\n2 - gbr\n3 - brg";
     let color_method_options = "0 - overflow\n1 - mod\n2 - lerp";
     let color_vecs_help = "input 3n rgb values seperated by spaces (no. of spaces dosent matter)";
@@ -100,14 +114,14 @@ pub fn infini_dump(board: &std::vec::Vec<std::vec::Vec<u16>>, height: i32, width
                 let mut nums = vec!();
                 for num_str in num_str_iter {
                     match num_str.parse::<f64>() {
-                        Ok(val) => nums.append(&mut vec!(val)),
+                        Ok(val) => nums.push(val),
                         Err(_) => println!("{}", bad_input),
                     }
                 }
                 if nums.len()%3 != 0 {println!("not good no. of inputs")}
                 op.color_vecs = vec![];
                 for i in 0..(nums.len()/3) {
-                    op.color_vecs.append(&mut vec!(Vec4d::new(nums[i*3], nums[i*3+1], nums[i*3+2], 0.0)));
+                    op.color_vecs.push(Vec4d::new(nums[i*3], nums[i*3+1], nums[i*3+2], 0.0));
                 }
                 // println!("{:?}", op.color_vecs);
                 println!("");
