@@ -9,6 +9,7 @@ mod buddhabrot_dumper;
 mod math;
 mod vec4d;
 mod progress_indicator;
+mod plotquations;
 
 mod mandlebrot_concurrency_testing;
 
@@ -16,7 +17,8 @@ fn main() {
     let now = time::Instant::now();
 
     // mandlebrot::mandlebrot();
-    buddhabrot::buddhabrot();
+    // buddhabrot::buddhabrot();
+    plotquations::ploteq();
     // mandlebrot_concurrency_testing::tesb();
     
     println!("{:?}", now.elapsed());

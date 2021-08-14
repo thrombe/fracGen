@@ -1,9 +1,3 @@
-plan:
-  . explain how generation works in comments
-  \. try limiting anti-aliasing to selective area (like where there is more detail)
-    \. how?
-  . time estimators instead of percentage (wherever applicable)
-  . 
 
 try:
   . convolutions on fractals/random images
@@ -18,9 +12,17 @@ try:
   . the complex cellular automata from sabestian lague
   . 
 
-rust stuff:
+plan:
+  . DOCUMENT STUFF
+  . a tool that commits changes every time the program outputs an image successfully
+    . commit name can be file name
+    . can do this in seperate repo
   . use command line arguments for ease
-  . std::time::SystemTime::now() - timestamp for filenames
+  . time estimators instead of percentage (wherever applicable)
+  . track variables with filenames in a json file so that even accidental stuff is saved?
+    . fracGec --remove latest ? how do i yeet things from this json?
+    . fracGen get-info -f 16....0.png
+      . this would get info from json and print
   . custom complex numbers can be enums with 2 different possible 
     representations, one with (real, imag), and other with (r, theta)
     . maybe (r^2, theta) ?. this saves a sqrt
@@ -28,13 +30,22 @@ rust stuff:
     . 
   . 
 
-rust buddhabrot:
-  . tips for nicer images
-    . increase the min_color or something (infinidump) to 15 to remove the background noise (if present)
-    . keep similar colors in the lerp coloring method
-    . keep more versions of same color and build it up slowly instead of jumping from 0 to 255
-    . see what colors you enter before entering (helps a lot)
+plotquations:
+  . parse colfunc and eq at runtime
+  . a grid for refrence?
+  . 
+
+img:
+  . struct
+    . multiple name strstegies - timestamp in sec/ns, vustom name, user input
     . 
+
+buddhabrot:
+  \. tips for nicer images
+    \. increase the min_color or something (infinidump) to 15 to remove the background noise (if present)
+    \. keep similar colors in the lerp coloring method
+    \. keep more versions of same color and build it up slowly instead of jumping from 0 to 255
+    \. see what colors you enter before entering (helps a lot)
   . make it easier to change parameters. i.e. bring the playable parameters at one place
   . try using the unsafe get_unchecked_mut pointer or something (for array/vec)
     . check how much performance difference (i saw it in multiple implementations)
@@ -49,6 +60,9 @@ rust buddhabrot:
     /. this is very specific to the mandlebrot set. so make it togglable somehow
     /. cardiod -> ((x-0.25)²+y²+x/2)²-((x-0.25)²+y²)/4 < 0
     /. circle -> (x-1)²+y²-(1/4)² < 0
+  . use the mandlebrot boundary somehow to get good quality trajectories
+    . grid method
+    . if point good, look around it (no searching for points needed)
   . do multiple color channels instead of just green
     . different iteration ranges for different channels
   . multiple color mapping from infinidump
@@ -56,7 +70,7 @@ rust buddhabrot:
     . some color map (like those in the mandlebrot app)
       \. this is kinda similar to the lerp method. just that every color change is linear
   . maybe add the ability to add more trajectories (from the infinidump func)
-  . randomly coloring the the BIG orbits (10^6 ~~ )
+  . randomly coloring the the BIG orbits (10^6 ~~ ) with diff colors
   . cache the 'good' points
   /. do time thing in infinidump
     . do this better
