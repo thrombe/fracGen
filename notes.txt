@@ -14,9 +14,7 @@ try:
 
 plan:
   . DOCUMENT STUFF
-  . a tool that commits changes every time the program outputs an image successfully
-    . commit name can be file name
-    . can do this in seperate repo
+  . distance estimated fractal rendering
   . use command line arguments for ease
   . time estimators instead of percentage (wherever applicable)
   . track variables with filenames in a json file so that even accidental stuff is saved?
@@ -37,7 +35,7 @@ plotquations:
 
 img:
   . struct
-    . multiple name strstegies - timestamp in sec/ns, vustom name, user input
+    . multiple name strategies - timestamp in sec/ns, vustom name, user input
     . 
 
 buddhabrot:

@@ -3,7 +3,8 @@ use super::math;
 use super::img;
 use super::vec4d;
 
-use std::f64::consts::{PI};
+#[allow(unused_imports)]
+use std::f64::consts::{PI, E};
 
 #[inline(always)]
 fn eq(x: f64, y: f64) -> f64 {

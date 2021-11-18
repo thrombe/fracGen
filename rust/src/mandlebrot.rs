@@ -57,7 +57,8 @@ pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel
     for i in 0..cores {
         let img = Arc::clone(&img);
         let dovmap = dovmap.clone();
-        let thread_y = i*work_per_thread;
+        let thread_y = i*work_per_thread; // the starting y coord of thread
+        let work_per_thread = if i == cores-1 {work_per_thread + leftover_work} else {work_per_thread};
         
         // cloning and creating some stuff cuz the threads need their own stuff. children cant share stuff. smh spoiled kids
         let xmap = math::MapRange::new(0.0, width as f64, xfrom, xto);
@@ -101,10 +102,7 @@ pub fn mandlebrot() { // output work in a image sized channel (crossbeam channel
             }
         };
         if i == cores-1 { // running last one on main thread and rest on children threads
-            #[allow(unused_variables)]
-            let work_per_thread = work_per_thread+leftover_work;
             process();
-            break
         } else {
             let worker = thread::spawn(process);
             worker_vec.push(worker);

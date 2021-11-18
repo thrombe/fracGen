@@ -66,6 +66,8 @@ pub fn buddhabrot() { // 3.5 for the good 5k image(10^5, 10^7), (1.5(its a tid b
         // create some stuff per thread cuz the threads need their own stuff. children cant share stuff. smh spoiled kids
         let xmap = math::MapRange::new(xfrom, xto, 0.0, width as f64);
         let ymap = math::MapRange::new(yfrom, yto, 0.0, height as f64);
+
+        let work_per_thread = if core == cores-1 {work_per_thread + leftover_work} else {work_per_thread};
         
         let process = move || {
             // dont clone rngs, results in same random no. generation
@@ -121,10 +123,7 @@ pub fn buddhabrot() { // 3.5 for the good 5k image(10^5, 10^7), (1.5(its a tid b
             }
         };
         if core == cores-1 { // running last one on main thread and rest on children threads
-            #[allow(unused_variables)]
-            let work_per_thread = work_per_thread + leftover_work; // should be captured by the closure
             process();
-            break
         } else {
             let worker = thread::spawn(process);
             worker_vec.push(worker);

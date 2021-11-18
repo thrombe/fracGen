@@ -30,7 +30,7 @@ impl Vec4d {
 
     #[inline(always)]
     pub fn size(&self) -> f64 {
-        (*self * *self).sqrt()
+        ((*self).dot(*self)).sqrt()
     }
 
     #[inline(always)]
@@ -48,7 +48,7 @@ impl Vec4d {
     pub fn cross3d(&self, other: Self) -> Self {
         Vec4d {
             x: self.y*other.z - other.y*self.z,
-            y: self.x*other.z - other.x*self.z,
+            y: -self.x*other.z + other.x*self.z,
             z: self.x*other.y - other.x*self.y,
             w: self.w,
         }
@@ -56,8 +56,20 @@ impl Vec4d {
 
     #[inline(always)]
     pub fn dot(&self, other: Self) -> f64 {
-        *self * other
+        self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
     }
+
+    // a wierd multiplication but idk where its useful
+    #[inline(always)]
+    pub fn mul(&self, other: Self) -> Self {
+        Vec4d {
+            x: self.x*other.x,
+            y: self.y*other.y,
+            z: self.z*other.z,
+            w: self.w*other.w,
+        }
+    }
+
 }
 
 use std::ops::{Add, Sub, Mul, AddAssign, SubAssign, MulAssign};
@@ -89,14 +101,14 @@ impl Sub for Vec4d {
 }
 
 // this isnt cross cuz cross is a 3d func, not 4d. so vec1*vec2 -> f64 makes more sense
-impl Mul for Vec4d {
-    type Output = f64;
+// impl Mul for Vec4d {
+//     type Output = f64;
 
-    #[inline(always)]
-    fn mul(self, other: Self) -> f64 {
-        self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
-    }
-}
+//     #[inline(always)]
+//     fn mul(self, other: Self) -> f64 {
+//         self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
+//     }
+// }
 
 impl Mul<f64> for Vec4d {
     type Output = Self;
